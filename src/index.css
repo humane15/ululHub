@@ -1,0 +1,62 @@
+@import 'tailwindcss';
+
+/* Token warna. Light dan dark mengikuti pengaturan sistem. */
+:root {
+  --c-bg: #f8fafc;
+  --c-surface: #ffffff;
+  --c-surface-2: #f1f5f9;
+  --c-border: #e2e8f0;
+  --c-text: #0f172a;
+  --c-muted: #64748b;
+  --c-primary: #0d9488;
+  --c-primary-soft: #ccfbf1;
+  --c-ok: #16a34a;
+  --c-warn: #ca8a04;
+  --c-bad: #dc2626;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-bg: #0b1120;
+    --c-surface: #111827;
+    --c-surface-2: #1e293b;
+    --c-border: #1f2a3c;
+    --c-text: #e2e8f0;
+    --c-muted: #94a3b8;
+    --c-primary: #2dd4bf;
+    --c-primary-soft: #134e4a;
+    --c-ok: #4ade80;
+    --c-warn: #facc15;
+    --c-bad: #f87171;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--c-bg);
+  --color-surface: var(--c-surface);
+  --color-surface-2: var(--c-surface-2);
+  --color-border: var(--c-border);
+  --color-text: var(--c-text);
+  --color-muted: var(--c-muted);
+  --color-primary: var(--c-primary);
+  --color-primary-soft: var(--c-primary-soft);
+  --color-ok: var(--c-ok);
+  --color-warn: var(--c-warn);
+  --color-bad: var(--c-bad);
+}
+
+@layer base {
+  html {
+    color-scheme: light dark;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-bg text-text antialiased;
+  }
+}
+
+/* Angka uang dan skor: monospace dengan lebar digit sama. */
+@utility num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
