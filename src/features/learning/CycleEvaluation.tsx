@@ -7,7 +7,16 @@ import { trackColor } from './colors'
 import { scoreInfo } from './score'
 
 /** Halaman minggu ke-13: ringkasan siklus dan ajakan merencanakan siklus berikutnya. */
-export function CycleEvaluation({ detail, ended }: { detail: CycleDetail; ended: boolean }) {
+export function CycleEvaluation({
+  detail,
+  ended,
+  archived = false,
+}: {
+  detail: CycleDetail
+  ended: boolean
+  /** true = dibuka dari riwayat siklus (siklus lama), tanpa ajakan membuat siklus berikutnya. */
+  archived?: boolean
+}) {
   const stats = cycleStats(
     detail.tactics.map((t) => ({ weekNumber: t.week_number, done: t.done })),
     TARGET_SCORE,
@@ -21,7 +30,9 @@ export function CycleEvaluation({ detail, ended }: { detail: CycleDetail; ended:
         <div>
           <h2 className="text-lg font-semibold">Evaluasi siklus</h2>
           <p className="text-sm text-muted">
-            {ended
+            {archived
+              ? 'Ringkasan hasil siklus ini.'
+              : ended
               ? 'Siklus ini sudah berakhir. Lihat hasilnya, lalu mulai siklus berikutnya.'
               : 'Minggu ke-13: istirahat, evaluasi, dan rencanakan siklus berikutnya.'}
           </p>
@@ -42,12 +53,14 @@ export function CycleEvaluation({ detail, ended }: { detail: CycleDetail; ended:
             <dd className="num text-xl font-semibold">{stats.weeksOnTarget}/12</dd>
           </div>
         </dl>
-        <Link
-          to="/belajar/siklus-baru"
-          className="inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white dark:text-slate-950"
-        >
-          Buat siklus berikutnya
-        </Link>
+        {!archived && (
+          <Link
+            to="/belajar/siklus-baru"
+            className="inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white dark:text-slate-950"
+          >
+            Buat siklus berikutnya
+          </Link>
+        )}
       </Card>
 
       <Card>

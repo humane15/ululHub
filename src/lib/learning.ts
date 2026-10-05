@@ -66,3 +66,40 @@ export function scoreSeries(weekly: readonly (number | null)[], elapsedWeeks: nu
     score: i < elapsedWeeks ? (weekly[i] ?? null) : null,
   }))
 }
+
+export interface WeekStatLike {
+  cycleId: string
+  weekNumber: number
+  total: number
+  done: number
+}
+
+export interface CycleHistoryStats {
+  /** Rata-rata skor minggu yang punya taktik; null kalau belum ada taktik. */
+  average: number | null
+  done: number
+  total: number
+  weeksOnTarget: number
+}
+
+/** Statistik riwayat per siklus dari jumlah taktik per minggu (view cycle_week_stats). */
+export function cycleHistoryStats(stats: readonly WeekStatLike[], target: number): Map<string, CycleHistoryStats> {
+  const byCycle = new Map<string, WeekStatLike[]>()
+  for (const s of stats) {
+    if (s.weekNumber < 1 || s.weekNumber > CYCLE_WEEKS) continue
+    const list = byCycle.get(s.cycleId) ?? []
+    list.push(s)
+    byCycle.set(s.cycleId, list)
+  }
+  const result = new Map<string, CycleHistoryStats>()
+  for (const [cycleId, weeks] of byCycle) {
+    const scores = weeks.map((w) => executionScore(w.done, w.total))
+    result.set(cycleId, {
+      average: averageScore(scores),
+      done: weeks.reduce((n, w) => n + w.done, 0),
+      total: weeks.reduce((n, w) => n + w.total, 0),
+      weeksOnTarget: scores.filter((s) => s !== null && s >= target).length,
+    })
+  }
+  return result
+}

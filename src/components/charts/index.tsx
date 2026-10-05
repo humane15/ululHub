@@ -3,6 +3,7 @@ import { lazy, Suspense, type ComponentProps } from 'react'
 // Recharts cukup besar; dimuat terpisah hanya saat grafik ditampilkan.
 const MonthlyBarChart = lazy(() => import('./MonthlyBarChart'))
 const ScoreLineChart = lazy(() => import('./ScoreLineChart'))
+const SavingsGrowthChart = lazy(() => import('./SavingsGrowthChart'))
 
 function Placeholder({ height }: { height: string }) {
   return <div className={`${height} animate-pulse rounded-xl bg-surface-2`} aria-hidden="true" />
@@ -20,6 +21,14 @@ export function LazyScoreLineChart(props: ComponentProps<typeof ScoreLineChart>)
   return (
     <Suspense fallback={<Placeholder height="h-56" />}>
       <ScoreLineChart {...props} />
+    </Suspense>
+  )
+}
+
+export function LazySavingsGrowthChart(props: ComponentProps<typeof SavingsGrowthChart>) {
+  return (
+    <Suspense fallback={<Placeholder height="h-56" />}>
+      <SavingsGrowthChart {...props} />
     </Suspense>
   )
 }

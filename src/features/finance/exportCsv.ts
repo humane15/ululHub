@@ -18,9 +18,10 @@ export function transactionsCsv(transactions: readonly Transaction[], categories
   return toCsv(HEADER, rows)
 }
 
-/** Mengunduh teks sebagai file di browser. */
+/** Mengunduh teks sebagai file di browser. BOM hanya untuk CSV (supaya Excel membaca UTF-8). */
 export function downloadText(filename: string, text: string, mime = 'text/csv;charset=utf-8') {
-  const url = URL.createObjectURL(new Blob([UTF8_BOM, text], { type: mime }))
+  const parts = mime.startsWith('text/csv') ? [UTF8_BOM, text] : [text]
+  const url = URL.createObjectURL(new Blob(parts, { type: mime }))
   const a = document.createElement('a')
   a.href = url
   a.download = filename

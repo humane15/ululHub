@@ -154,17 +154,22 @@ export default function KeuanganPage() {
             <Card>
               <div className="mb-2 flex items-center justify-between">
                 <h2 className="font-semibold">Riwayat transaksi</h2>
-                {data.transactions.length > 0 && (
-                  <button
-                    type="button"
-                    className="text-sm font-medium text-primary"
-                    onClick={() =>
-                      downloadText(`transaksi-${toMonthParam(month)}.csv`, transactionsCsv(data.transactions, view.byId))
-                    }
-                  >
-                    Ekspor CSV
-                  </button>
-                )}
+                <div className="flex gap-4">
+                  <Link to="/keuangan/cari" className="text-sm font-medium text-primary">
+                    Cari
+                  </Link>
+                  {data.transactions.length > 0 && (
+                    <button
+                      type="button"
+                      className="text-sm font-medium text-primary"
+                      onClick={() =>
+                        downloadText(`transaksi-${toMonthParam(month)}.csv`, transactionsCsv(data.transactions, view.byId))
+                      }
+                    >
+                      Ekspor CSV
+                    </button>
+                  )}
+                </div>
               </div>
               {data.transactions.length === 0 ? (
                 <EmptyState title="Belum ada transaksi bulan ini." description="Mulai dengan mencatat gaji." />

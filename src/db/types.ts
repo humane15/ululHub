@@ -152,6 +152,24 @@ export type MonthlyTotal = {
   transaction_count: number
 }
 
+/** View cycle_week_stats: jumlah taktik per minggu tiap siklus. */
+export type CycleWeekStat = {
+  user_id: UUID
+  cycle_id: UUID
+  week_number: number
+  total: number
+  done: number
+}
+
+/** View monthly_category_totals: uang keluar per pos per bulan. */
+export type MonthlyCategoryTotal = {
+  user_id: UUID
+  /** Tanggal 1. */
+  month: ISODate
+  category_id: UUID
+  total_out: number
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -178,6 +196,8 @@ export type Database = {
     }
     Views: {
       monthly_totals: { Row: MonthlyTotal; Relationships: [] }
+      cycle_week_stats: { Row: CycleWeekStat; Relationships: [] }
+      monthly_category_totals: { Row: MonthlyCategoryTotal; Relationships: [] }
     }
     Functions: {
       seed_initial_data: {
@@ -187,6 +207,14 @@ export type Database = {
       create_learning_cycle: {
         Args: { p_name: string; p_start: ISODate; p_vision: string; p_source: UUID | null; p_mode: string }
         Returns: UUID
+      }
+      set_cycle_status: {
+        Args: { p_cycle: UUID; p_status: CycleStatus }
+        Returns: undefined
+      }
+      restore_backup: {
+        Args: { p_data: unknown }
+        Returns: undefined
       }
     }
     Enums: { [_ in never]: never }

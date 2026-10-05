@@ -33,7 +33,8 @@ Buka **SQL Editor → New query**, lalu jalankan file di `supabase/migrations/` 
 
 Sudah pernah menjalankan sebagian? Cukup jalankan file yang **belum** pernah dijalankan, sesuai urutan.
 
-Cek di **Table Editor**: harus ada 11 tabel (semuanya berlabel RLS aktif) dan view `monthly_totals`.
+Cek di **Table Editor**: harus ada 11 tabel (semuanya berlabel RLS aktif) dan view `monthly_totals`,
+`monthly_category_totals`, serta `cycle_week_stats`.
 
 > Alternatif lewat CLI: `npx supabase login`, `npx supabase link --project-ref <ref>`, lalu `npx supabase db push`.
 
@@ -113,6 +114,12 @@ cepat **Catat pengeluaran**.
 - **Pos anggaran** berlaku untuk semua bulan. Jenis pos tidak bisa diubah setelah dibuat (supaya laporan lama tetap
   sama); pos yang sudah dipakai hanya bisa diarsipkan.
 - **Laporan**: grafik batang 6 bulan terakhir dan tabel semua bulan, dihitung di database lewat view `monthly_totals`.
+- **Laporan tahunan** (`/laporan/tahunan`): pilih tahun; total pemasukan, pengeluaran, ditabung, dan rasio
+  tabungan per bulan, perbandingan dengan tahun sebelumnya, pos yang paling sering lewat batas, dan ekspor CSV
+  setahun penuh.
+- **Total tabungan berjalan** di halaman Laporan: akumulasi semua setoran tabungan sejak awal beserta grafiknya.
+- **Cari transaksi** (`/keuangan/cari`): filter rentang tanggal, pos, dan kata kunci catatan. Hasil dimuat per
+  50 baris (paginasi) dan selalu lewat query ber-filter, jadi tetap cepat walau transaksinya ribuan.
 - **Ekspor CSV** transaksi per bulan (tombol di kartu Riwayat transaksi). Format: pemisah koma, UTF-8 dengan BOM,
   jumlah berupa angka bulat tanpa pemisah ribuan. Kalau Excel menampilkan semuanya dalam satu kolom
   (pengaturan regional Indonesia memakai titik koma), buka lewat **Data → From Text/CSV** dan pilih pemisah koma.
@@ -129,6 +136,84 @@ cepat **Catat pengeluaran**.
   lengkap (termasuk topik). Siklus aktif lama otomatis ditandai selesai, datanya tetap ada.
 - **Atur siklus** (`/belajar/atur`): nama, visi, jalur (warna, target, urutan), dan jadwal harian.
 - **Catatan** (`/belajar/catatan`): catatan markdown sederhana (judul, daftar, tebal, miring, kode, link).
+- **Riwayat siklus** (`/belajar/riwayat`): semua siklus dengan rata-rata skor, taktik selesai, dan minggu yang
+  mencapai target, plus grafik perbandingan antar siklus. Dari sini siklus bisa diarsipkan, dikeluarkan dari
+  arsip, atau dijadikan aktif lagi (siklus aktif lain otomatis ditandai selesai). Klik nama siklus untuk melihat
+  evaluasi lengkapnya.
+
+## Cadangan data
+
+### Dari aplikasi (manual)
+
+**Pengaturan → Cadangan data**:
+
+- **Unduh cadangan**: semua data (pos, anggaran, transaksi, siklus, taktik, review, jadwal, catatan) dalam
+  satu file `ulul-hub-cadangan-YYYY-MM-DD.json`. Simpan di tempat aman (Google Drive, flashdisk).
+- **Pulihkan dari cadangan**: pilih file JSON tadi. Aplikasi menampilkan **pratinjau** jumlah data sekarang vs
+  di file; baris merah berarti datanya akan berkurang. Setelah dicentang dan dikonfirmasi, **semua data di akun
+  diganti** isi file. Pemulihan berjalan dalam satu transaksi database: kalau gagal di tengah, tidak ada yang berubah.
+- File cadangan bisa dipulihkan ke akun atau project Supabase **baru** (data otomatis menjadi milik akun yang
+  sedang login). Ini cara termudah pindah project.
+
+### Cadangan otomatis (GitHub Actions)
+
+Workflow `.github/workflows/supabase.yml` berjalan gratis di GitHub:
+
+| Jadwal | Tugas |
+|---|---|
+| Setiap Senin 02:00 WIB | `pg_dump` data database, dienkripsi, disimpan sebagai **artifact** workflow selama 90 hari |
+| Setiap 3 hari | Satu query ringan ke database supaya project tidak dijeda (lihat bagian berikutnya) |
+
+**Memasang (sekali saja):**
+
+1. Di Supabase, klik **Connect** → tab **Connection string** → pilih **Session pooler** (bukan *Direct
+   connection*, karena server GitHub tidak mendukung IPv6). Salin URL-nya dan ganti `[YOUR-PASSWORD]` dengan
+   password database dari langkah 1. Bentuknya:
+   `postgresql://postgres.<ref>:<password>@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres`
+2. Di GitHub: repo → **Settings → Secrets and variables → Actions → New repository secret**, buat dua secret:
+   - `SUPABASE_DB_URL`: connection string tadi.
+   - `BACKUP_PASSPHRASE`: kata sandi panjang untuk mengenkripsi cadangan. **Simpan juga di password manager**;
+     tanpa ini file cadangan tidak bisa dibuka.
+3. Cek versi Postgres di Supabase (**Project Settings → Infrastructure**). Kalau bukan 17, buat
+   **variable** (tab *Variables*, bukan secret) `PG_MAJOR` berisi angka versinya, misalnya `15`.
+4. Uji: tab **Actions → Supabase → Run workflow**, pilih `cadangan`, lalu `jaga-aktif`. Keduanya harus hijau.
+
+Cadangan dienkripsi karena artifact bisa diunduh siapa pun yang punya akses ke repo. Tetap pakai repo **Private**.
+GitHub juga mematikan jadwal workflow di repo **publik** yang tidak ada aktivitas 60 hari; repo private tidak
+terkena aturan ini, dan pemakaiannya jauh di bawah kuota gratis.
+
+**Memulihkan dari cadangan otomatis:**
+
+1. **Actions → Supabase →** pilih run yang berhasil → unduh artifact `ulul-hub-YYYY-MM-DD` (berupa zip), ekstrak.
+2. Dekripsi (butuh `gpg` dan `psql`; di Windows pakai WSL atau Git Bash):
+
+   ```bash
+   gpg -d ulul-hub-YYYY-MM-DD.sql.gz.gpg | gunzip > ulul-hub.sql   # minta BACKUP_PASSPHRASE
+   ```
+
+3. **Kalau memulihkan ke project baru**: jalankan semua migration, buat akun dan login sekali (langkah 5–6,
+   tanpa *Isi data awal*), lalu ganti id user lama dengan yang baru (lihat di **Authentication → Users**):
+
+   ```bash
+   sed -i 's/<id-user-lama>/<id-user-baru>/g' ulul-hub.sql
+   ```
+
+   Id user lama = kolom kedua (`user_id`) di baris data mana pun dalam file:
+
+   ```bash
+   awk -F'\t' '/^COPY public\./ { getline; if ($0 != "\\.") { print $2; exit } }' ulul-hub.sql
+   ```
+4. Kosongkan data lama, lalu pulihkan dalam satu transaksi:
+
+   ```bash
+   psql "$SUPABASE_DB_URL" -c "truncate public.transactions, public.budget_month_items, public.budget_months, public.budget_categories, public.learning_cycles, public.notes cascade"
+   psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 --single-transaction -f ulul-hub.sql
+   ```
+
+   Kalau ada error, transaksi dibatalkan dan data tidak setengah jadi.
+
+Cara lain yang lebih mudah: unduh **cadangan JSON dari aplikasi** secara rutin, karena bisa dipulihkan
+langsung dari halaman Pengaturan.
 
 ## Deploy ke internet (GitHub + Vercel)
 
@@ -198,11 +283,26 @@ tersedia"**; tekan **Muat ulang** untuk memakainya.
 Supabase menjeda project gratis yang tidak ada aktivitas sekitar 7 hari. Data **tidak hilang**, tetapi
 aplikasi tidak bisa memuat data sampai project diaktifkan lagi.
 
-Mengaktifkan kembali: buka dashboard Supabase, pilih project, klik **Restore project**, tunggu beberapa menit.
+**Penjaganya:** job `jaga-aktif` di workflow GitHub Actions (lihat *Cadangan otomatis*) menjalankan satu
+query ringan (`select count(*) from public.learning_cycles`) setiap 3 hari, ditambah cadangan mingguan yang juga
+mengakses database. Jadi project tetap aktif walaupun kamu libur memakai aplikasi. Pastikan secret
+`SUPABASE_DB_URL` sudah diisi dan run di tab **Actions** hijau.
+
+Kalau tetap terjeda (misalnya secret salah atau workflow mati): buka dashboard Supabase, pilih project, klik
+**Restore project**, tunggu beberapa menit. Setelah aktif, cek tab **Actions** dan jalankan workflow manual
+untuk memastikan penjaganya kembali berjalan.
 
 ## Perawatan
 
-Update dependensi dengan aman (misalnya setahun sekali):
+Rutinitas tahunan (misalnya setiap awal Januari):
+
+1. **Unduh cadangan** dari Pengaturan dan simpan di luar Supabase.
+2. **Cek backup otomatis**: tab **Actions → Supabase**, pastikan run mingguan terakhir hijau. Unduh satu artifact
+   dan coba dekripsi (`gpg -d ... | gunzip | head`) untuk memastikan `BACKUP_PASSPHRASE` yang kamu simpan benar.
+3. Buka **Laporan tahunan** tahun lalu dan **Riwayat siklus**; arsipkan siklus yang sudah tidak perlu dilihat.
+4. Update dependensi (di bawah).
+
+Update dependensi dengan aman:
 
 ```bash
 git switch -c update-dependensi

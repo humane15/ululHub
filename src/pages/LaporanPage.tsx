@@ -1,15 +1,18 @@
 import { Link } from 'react-router'
-import { LazyMonthlyBarChart } from '../components/charts'
+import { LazyMonthlyBarChart, LazySavingsGrowthChart } from '../components/charts'
 import { Card, EmptyState, ErrorMessage, PageHeader } from '../components/ui'
 import { listMonthlyTotals } from '../db/finance'
 import { useQuery } from '../db/useQuery'
 import { summaryFromTotals } from '../lib/budget'
 import { formatBulan, monthStart, todayJakarta, toMonthParam } from '../lib/dates'
-import { monthlySeries } from '../lib/report'
+import { cumulativeSavings, monthlySeries } from '../lib/report'
 import { formatPercentBp, formatRupiah } from '../lib/money'
 
 export default function LaporanPage() {
   const query = useQuery(listMonthlyTotals, [])
+  const totals = (query.data ?? []).map((t) => ({ month: t.month, income: t.income, totalOut: t.total_out, saved: t.saved }))
+  const currentMonth = monthStart(todayJakarta())
+  const savings = cumulativeSavings(totals, currentMonth)
   const rows = (query.data ?? []).map((t) => ({
     month: t.month,
     summary: summaryFromTotals({ income: t.income, totalOut: t.total_out, saved: t.saved }),
@@ -17,7 +20,18 @@ export default function LaporanPage() {
 
   return (
     <>
-      <PageHeader title="Laporan" subtitle="Ringkasan setiap bulan" />
+      <PageHeader
+        title="Laporan"
+        subtitle="Ringkasan setiap bulan"
+        actions={
+          <Link
+            to="/laporan/tahunan"
+            className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm font-medium hover:bg-surface-2"
+          >
+            Laporan tahunan
+          </Link>
+        }
+      />
       {query.error && <ErrorMessage error={query.error} onRetry={query.reload} />}
       {!query.data && !query.error && <p className="text-sm text-muted">Memuat…</p>}
       {query.data && rows.length === 0 && (
@@ -26,13 +40,17 @@ export default function LaporanPage() {
       {rows.length > 0 && (
         <Card className="mb-4">
           <h2 className="mb-3 font-semibold">6 bulan terakhir</h2>
-          <LazyMonthlyBarChart
-            data={monthlySeries(
-              (query.data ?? []).map((t) => ({ month: t.month, income: t.income, totalOut: t.total_out, saved: t.saved })),
-              monthStart(todayJakarta()),
-              6,
-            )}
-          />
+          <LazyMonthlyBarChart data={monthlySeries(totals, currentMonth, 6)} />
+        </Card>
+      )}
+      {savings.length > 0 && (
+        <Card className="mb-4">
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="font-semibold">Total tabungan berjalan</h2>
+            <p className="num text-lg font-semibold">{formatRupiah(savings.at(-1)!.total)}</p>
+          </div>
+          <p className="mb-3 text-xs text-muted">Akumulasi semua setoran tabungan sejak {formatBulan(savings[0]!.month)}.</p>
+          <LazySavingsGrowthChart data={savings} />
         </Card>
       )}
       {rows.length > 0 && (

@@ -61,7 +61,17 @@ export default function BelajarPage() {
   if (!query.data.cycle) {
     return (
       <>
-        <PageHeader title="Belajar" subtitle="Rencana 12 Week Year" actions={<Link to="/belajar/catatan" className={linkClass}>Catatan</Link>} />
+        <PageHeader title="Belajar" subtitle="Rencana 12 Week Year" actions={
+            <div className="flex gap-2">
+              <Link to="/belajar/riwayat" className={linkClass}>
+                Riwayat
+              </Link>
+              <Link to="/belajar/catatan" className={linkClass}>
+                Catatan
+              </Link>
+            </div>
+          }
+        />
         <EmptyState
           title="Belum ada siklus aktif."
           description="Buat siklus baru untuk mulai merencanakan 12 minggu ke depan."
@@ -109,7 +119,10 @@ function ActiveCycle({
         title={cycle.name}
         subtitle={positionText(cycle, position)}
         actions={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Link to="/belajar/riwayat" className={linkClass}>
+              Riwayat
+            </Link>
             <Link to="/belajar/catatan" className={linkClass}>
               Catatan
             </Link>

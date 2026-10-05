@@ -1,5 +1,6 @@
 import { Button, Card, PageHeader } from '../components/ui'
 import { signOut, useSession } from '../features/auth/auth'
+import { BackupCard } from '../features/settings/BackupCard'
 import { SeedDataCard } from '../features/settings/SeedDataCard'
 
 export default function PengaturanPage() {
@@ -9,6 +10,7 @@ export default function PengaturanPage() {
       <PageHeader title="Pengaturan" />
       <div className="space-y-4">
         <SeedDataCard />
+        <BackupCard />
         <Card className="space-y-3">
           <dl className="flex items-center justify-between gap-3 text-sm">
             <dt className="text-muted">Masuk sebagai</dt>

@@ -1,0 +1,92 @@
+# Cadangan otomatis database Supabase + menjaga project gratis tetap aktif.
+# Panduan memasang dan memulihkan: README, bagian "Cadangan otomatis (GitHub Actions)".
+#
+# Secret repository yang dibutuhkan (Settings -> Secrets and variables -> Actions):
+#   SUPABASE_DB_URL    connection string Session pooler (postgresql://postgres.xxxx:PASSWORD@...pooler.supabase.com:5432/postgres)
+#   BACKUP_PASSPHRASE  kata sandi untuk mengenkripsi file cadangan (simpan juga di password manager!)
+# Variable opsional:
+#   PG_MAJOR           versi utama Postgres project Supabase (bawaan 17), lihat Settings -> Infrastructure.
+
+name: Supabase
+
+on:
+  schedule:
+    - cron: '0 19 * * 0' # cadangan: setiap Minggu 19:00 UTC = Senin 02:00 WIB
+    - cron: '0 1 */3 * *' # jaga aktif: setiap 3 hari 08:00 WIB
+  workflow_dispatch:
+    inputs:
+      task:
+        description: Yang dijalankan
+        type: choice
+        options: [cadangan, jaga-aktif]
+        default: cadangan
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase
+  cancel-in-progress: false
+
+env:
+  PG_MAJOR: ${{ vars.PG_MAJOR || '17' }}
+
+jobs:
+  jaga-aktif:
+    if: github.event.schedule == '0 1 */3 * *' || inputs.task == 'jaga-aktif'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Query ringan ke database
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "$SUPABASE_DB_URL" ]; then echo "::error::Secret SUPABASE_DB_URL belum diisi"; exit 1; fi
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -At -c "select count(*) from public.learning_cycles" > /dev/null
+          echo "Database aktif."
+
+  cadangan:
+    if: github.event.schedule == '0 19 * * 0' || inputs.task == 'cadangan'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Pasang pg_dump ${{ env.PG_MAJOR }}
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y -qq "postgresql-client-${PG_MAJOR}"
+
+      - name: Dump data dan enkripsi
+        id: dump
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          if [ -z "$SUPABASE_DB_URL" ]; then echo "::error::Secret SUPABASE_DB_URL belum diisi"; exit 1; fi
+          if [ -z "$BACKUP_PASSPHRASE" ]; then echo "::error::Secret BACKUP_PASSPHRASE belum diisi"; exit 1; fi
+
+          name="ulul-hub-$(TZ=Asia/Jakarta date +%F)"
+          # Hanya data skema public; struktur tabel sudah ada di supabase/migrations/.
+          "/usr/lib/postgresql/${PG_MAJOR}/bin/pg_dump" "$SUPABASE_DB_URL" \
+            --data-only --schema=public --no-owner --no-privileges \
+            | gzip -9 \
+            | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 3 \
+                --symmetric --cipher-algo AES256 --output "$name.sql.gz.gpg" 3<<< "$BACKUP_PASSPHRASE"
+
+          size=$(stat -c %s "$name.sql.gz.gpg")
+          if [ "$size" -lt 200 ]; then echo "::error::File cadangan terlalu kecil ($size byte)"; exit 1; fi
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "Cadangan $name.sql.gz.gpg ($size byte) siap." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Simpan sebagai artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.dump.outputs.name }}
+          path: ${{ steps.dump.outputs.name }}.sql.gz.gpg
+          retention-days: 90
+          if-no-files-found: error
+          compression-level: 0

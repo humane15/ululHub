@@ -1,8 +1,9 @@
 import type { CategoryLike, CategoryType } from '../lib/budget'
-import { monthRange, type ISODate } from '../lib/dates'
+import { monthRange, yearRange, type ISODate } from '../lib/dates'
+import { containsPattern, pageRange, SEARCH_PAGE_SIZE, type TransactionFilter } from '../lib/search'
 import { DbError, FK_VIOLATION, fail } from './errors'
 import { supabase } from './supabase'
-import type { BudgetCategory, BudgetMonth, Database, MonthlyTotal, Transaction } from './types'
+import type { BudgetCategory, BudgetMonth, Database, MonthlyCategoryTotal, MonthlyTotal, Transaction } from './types'
 
 type TransactionInsert = Database['public']['Tables']['transactions']['Insert']
 
@@ -165,6 +166,52 @@ export async function listMonthTransactions(month: ISODate): Promise<Transaction
   return data
 }
 
+/** Batas baris per permintaan PostgREST (bawaan Supabase: 1000). */
+const FETCH_CHUNK = 1000
+
+/** Semua transaksi dalam rentang [start, end), diambil per 1000 baris. Urut tanggal lama -> baru. */
+export async function listTransactionsInRange(start: ISODate, end: ISODate): Promise<Transaction[]> {
+  const all: Transaction[] = []
+  for (let from = 0; ; from += FETCH_CHUNK) {
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('*')
+      .gte('date', start)
+      .lt('date', end)
+      .order('date')
+      .order('created_at')
+      .order('id')
+      .range(from, from + FETCH_CHUNK - 1)
+    if (error) fail(error)
+    all.push(...data)
+    if (data.length < FETCH_CHUNK) return all
+  }
+}
+
+export interface SearchResult {
+  rows: Transaction[]
+  /** Jumlah semua baris yang cocok (untuk paginasi). */
+  total: number
+}
+
+/** Pencarian transaksi per halaman (terbaru dulu). Tidak pernah memuat semua transaksi. */
+export async function searchTransactions(filter: TransactionFilter): Promise<SearchResult> {
+  let q = supabase.from('transactions').select('*', { count: 'exact' })
+  if (filter.from) q = q.gte('date', filter.from)
+  if (filter.to) q = q.lte('date', filter.to)
+  if (filter.category === 'pemasukan') q = q.eq('type', 'masuk')
+  else if (filter.category) q = q.eq('category_id', filter.category)
+  if (filter.keyword.trim()) q = q.ilike('note', containsPattern(filter.keyword))
+  const { from, to } = pageRange(filter.page, SEARCH_PAGE_SIZE)
+  const { data, error, count } = await q
+    .order('date', { ascending: false })
+    .order('created_at', { ascending: false })
+    .order('id')
+    .range(from, to)
+  if (error) fail(error)
+  return { rows: data, total: count ?? 0 }
+}
+
 export type TransactionInput = Pick<TransactionInsert, 'date' | 'type' | 'category_id' | 'income_source' | 'amount' | 'note'>
 
 export async function createTransaction(input: TransactionInput) {
@@ -192,4 +239,36 @@ export async function listMonthlyTotals(): Promise<MonthlyTotal[]> {
     .order('month', { ascending: false })
   if (error) fail(error)
   return data
+}
+
+/** Uang keluar per pos per bulan dalam satu tahun. */
+export async function listCategoryTotalsInYear(year: number): Promise<MonthlyCategoryTotal[]> {
+  const { start, end } = yearRange(year)
+  const { data, error } = await supabase.from('monthly_category_totals').select('*').gte('month', start).lt('month', end)
+  if (error) fail(error)
+  return data
+}
+
+export interface YearBudgets {
+  /** Bulan (tanggal 1) yang punya anggaran. */
+  months: Set<ISODate>
+  items: { month: ISODate; categoryId: string; amount: number }[]
+}
+
+/** Anggaran semua bulan dalam satu tahun. */
+export async function listBudgetsInYear(year: number): Promise<YearBudgets> {
+  const { start, end } = yearRange(year)
+  const { data: months, error } = await supabase.from('budget_months').select('id, month').gte('month', start).lt('month', end)
+  if (error) fail(error)
+  if (months.length === 0) return { months: new Set(), items: [] }
+  const { data: items, error: itemsError } = await supabase
+    .from('budget_month_items')
+    .select('budget_month_id, category_id, amount')
+    .in('budget_month_id', months.map((m) => m.id))
+  if (itemsError) fail(itemsError)
+  const monthById = new Map(months.map((m) => [m.id, m.month]))
+  return {
+    months: new Set(months.map((m) => m.month)),
+    items: items.map((i) => ({ month: monthById.get(i.budget_month_id)!, categoryId: i.category_id, amount: i.amount })),
+  }
 }

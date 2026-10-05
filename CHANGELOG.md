@@ -2,6 +2,27 @@
 
 Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan versi memakai [SemVer](https://semver.org/lang/id/).
 
+## [0.7.0] - 2026-10-05
+
+### Ditambahkan
+- Riwayat siklus (`/belajar/riwayat`): rata-rata skor, taktik selesai, minggu tercapai, grafik perbandingan
+  antar siklus, arsipkan/keluarkan dari arsip/jadikan aktif, dan halaman evaluasi siklus lama.
+- Laporan tahunan (`/laporan/tahunan`): 12 bulan per tahun, perbandingan dengan tahun sebelumnya, pos yang paling
+  sering lewat batas, ekspor CSV per tahun.
+- Total tabungan berjalan dengan grafik pertumbuhan di halaman Laporan.
+- Cari transaksi (`/keuangan/cari`): filter tanggal, pos, kata kunci catatan, paginasi 50 baris.
+- Cadangan data: unduh semua data ke JSON dan pulihkan dengan pratinjau (satu transaksi database).
+- GitHub Actions `supabase.yml`: `pg_dump` terenkripsi mingguan sebagai artifact dan query penjaga setiap 3 hari
+  supaya project Supabase tidak dijeda.
+- Migration `20261005000005`: view `cycle_week_stats` dan `monthly_category_totals`, fungsi `set_cycle_status`
+  dan `restore_backup`.
+- Fungsi murni baru + test: `yearMonths`, `yearSummary`, `compareYears`, `availableYears`, `cumulativeSavings`,
+  `overBudgetCounts`, `cycleHistoryStats`, `src/lib/search.ts`, `src/lib/backup.ts`.
+- README: cadangan manual dan otomatis, cara memulihkan, penjaga Supabase, rutinitas perawatan tahunan.
+
+### Diubah
+- File JSON yang diunduh tidak lagi diberi BOM (BOM hanya untuk CSV).
+
 ## [0.6.0] - 2026-10-05
 
 ### Ditambahkan

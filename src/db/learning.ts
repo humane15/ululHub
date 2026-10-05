@@ -2,6 +2,8 @@ import type { ISODate } from '../lib/dates'
 import { fail } from './errors'
 import { supabase } from './supabase'
 import type {
+  CycleStatus,
+  CycleWeekStat,
   LearningCycle,
   LearningTactic,
   LearningTrack,
@@ -28,6 +30,26 @@ export async function getCycleOverview(): Promise<{ latest: LearningCycle | null
     .limit(1)
   if (error) fail(error)
   return { latest: data[0] ?? null, count: count ?? 0 }
+}
+
+/** Semua siklus, terbaru dulu (beberapa per tahun, jadi aman dimuat sekaligus). */
+export async function listCycles(): Promise<LearningCycle[]> {
+  const { data, error } = await supabase.from('learning_cycles').select('*').order('start_date', { ascending: false })
+  if (error) fail(error)
+  return data
+}
+
+/** Jumlah taktik per minggu semua siklus (view cycle_week_stats). */
+export async function listCycleWeekStats(): Promise<CycleWeekStat[]> {
+  const { data, error } = await supabase.from('cycle_week_stats').select('*')
+  if (error) fail(error)
+  return data
+}
+
+/** Mengaktifkan siklus otomatis menandai siklus aktif lain sebagai selesai. */
+export async function setCycleStatus(id: string, status: CycleStatus) {
+  const { error } = await supabase.rpc('set_cycle_status', { p_cycle: id, p_status: status })
+  if (error) fail(error)
 }
 
 export type CopyMode = 'kosong' | 'struktur' | 'lengkap'

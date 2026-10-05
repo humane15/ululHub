@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { cycleStats, initialWeekView, nextSortOrder, scoreSeries, tacticProgress } from './learning'
+import { cycleHistoryStats, cycleStats, initialWeekView, nextSortOrder, scoreSeries, tacticProgress } from './learning'
 
 describe('initialWeekView', () => {
   it('mengikuti posisi siklus', () => {
@@ -54,5 +54,23 @@ describe('scoreSeries', () => {
       { week: 4, score: 50 },
       { week: 5, score: null },
     ])
+  })
+})
+
+describe('cycleHistoryStats', () => {
+  it('rata-rata skor, total taktik, dan minggu tercapai per siklus', () => {
+    const stats = cycleHistoryStats(
+      [
+        { cycleId: 'a', weekNumber: 1, total: 4, done: 4 },
+        { cycleId: 'a', weekNumber: 2, total: 4, done: 2 },
+        { cycleId: 'a', weekNumber: 3, total: 0, done: 0 },
+        { cycleId: 'b', weekNumber: 1, total: 3, done: 0 },
+        { cycleId: 'b', weekNumber: 13, total: 9, done: 9 }, // di luar 1..12 diabaikan
+      ],
+      85,
+    )
+    expect(stats.get('a')).toEqual({ average: 75, done: 6, total: 8, weeksOnTarget: 1 })
+    expect(stats.get('b')).toEqual({ average: 0, done: 0, total: 3, weeksOnTarget: 0 })
+    expect(stats.has('c')).toBe(false)
   })
 })
