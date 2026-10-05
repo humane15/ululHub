@@ -1,21 +1,25 @@
+import { lazy } from 'react'
 import { Route, Routes } from 'react-router'
-import AnggaranPage from './pages/AnggaranPage'
 import { AppLayout } from './components/AppLayout'
 import { LoadingScreen } from './components/ui'
+import { UpdatePrompt } from './components/UpdatePrompt'
 import { isSupabaseConfigured } from './db/supabase'
 import { useAuth } from './features/auth/auth'
 import { AuthProvider } from './features/auth/AuthProvider'
 import { LoginPage } from './features/auth/LoginPage'
 import { SetupNeeded } from './features/auth/SetupNeeded'
-import AturSiklusPage from './pages/AturSiklusPage'
-import BelajarPage from './pages/BelajarPage'
-import CatatanPage from './pages/CatatanPage'
-import BerandaPage from './pages/BerandaPage'
-import KeuanganPage from './pages/KeuanganPage'
-import LaporanPage from './pages/LaporanPage'
-import NotFoundPage from './pages/NotFoundPage'
-import PengaturanPage from './pages/PengaturanPage'
-import SiklusBaruPage from './pages/SiklusBaruPage'
+
+// Setiap halaman dimuat terpisah supaya pembukaan pertama di HP lebih ringan.
+const AnggaranPage = lazy(() => import('./pages/AnggaranPage'))
+const AturSiklusPage = lazy(() => import('./pages/AturSiklusPage'))
+const BelajarPage = lazy(() => import('./pages/BelajarPage'))
+const BerandaPage = lazy(() => import('./pages/BerandaPage'))
+const CatatanPage = lazy(() => import('./pages/CatatanPage'))
+const KeuanganPage = lazy(() => import('./pages/KeuanganPage'))
+const LaporanPage = lazy(() => import('./pages/LaporanPage'))
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
+const PengaturanPage = lazy(() => import('./pages/PengaturanPage'))
+const SiklusBaruPage = lazy(() => import('./pages/SiklusBaruPage'))
 
 function AuthGate() {
   const { session } = useAuth()
@@ -40,10 +44,16 @@ function AuthGate() {
 }
 
 export default function App() {
-  if (!isSupabaseConfigured) return <SetupNeeded />
   return (
-    <AuthProvider>
-      <AuthGate />
-    </AuthProvider>
+    <>
+      {isSupabaseConfigured ? (
+        <AuthProvider>
+          <AuthGate />
+        </AuthProvider>
+      ) : (
+        <SetupNeeded />
+      )}
+      <UpdatePrompt />
+    </>
   )
 }

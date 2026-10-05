@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Full-bleed: Android memotong ikon menjadi lingkaran/kotak; isi berada di zona aman 80% tengah. -->
+  <rect width="512" height="512" fill="#0d9488"/>
+  <g transform="translate(256 256) scale(0.72) translate(-256 -256)">
+    <path d="M164 140v130a92 92 0 0 0 184 0V140" fill="none" stroke="#ffffff" stroke-width="60" stroke-linecap="round"/>
+    <circle cx="256" cy="140" r="30" fill="#99f6e4"/>
+  </g>
+</svg>

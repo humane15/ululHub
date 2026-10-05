@@ -1,4 +1,4 @@
-import type { ComponentType, SVGProps } from 'react'
+import { Suspense, type ComponentType, type SVGProps } from 'react'
 import { NavLink, Outlet } from 'react-router'
 import { BookIcon, ChartIcon, HomeIcon, SettingsIcon, WalletIcon } from './icons'
 
@@ -69,7 +69,9 @@ export function AppLayout() {
         </header>
 
         <main className="mx-auto w-full max-w-5xl flex-1 px-4 pt-4 pb-28 md:px-8 md:pt-8 md:pb-10">
-          <Outlet />
+          <Suspense fallback={<p className="text-sm text-muted">Memuat…</p>}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
 

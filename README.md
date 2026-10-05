@@ -65,6 +65,21 @@ Aplikasi tidak membuat user baru dari halaman login (`shouldCreateUser: false`),
 
 Sekarang hanya email kamu yang bisa menerima link masuk.
 
+### 5b. Tambahkan kode masuk ke email (untuk aplikasi di HP)
+
+Aplikasi yang dipasang di layar utama (terutama iPhone) tidak bisa menerima link login, karena link dari
+email selalu terbuka di browser. Karena itu email login juga perlu memuat kode yang bisa diketik di aplikasi.
+
+**Authentication → Emails → Templates → Magic Link**, ganti isi **Message body** dengan:
+
+```html
+<h2>Masuk ke Ulul Hub</h2>
+<p><a href="{{ .ConfirmationURL }}">Klik untuk masuk</a></p>
+<p>Atau ketik kode ini di aplikasi: <strong>{{ .Token }}</strong></p>
+```
+
+lalu **Save**.
+
 ### 6. Masuk dan isi data awal
 
 1. `npm run dev`, buka http://localhost:5173, masukkan email, klik link di email.
@@ -115,4 +130,88 @@ cepat **Catat pengeluaran**.
 - **Atur siklus** (`/belajar/atur`): nama, visi, jalur (warna, target, urutan), dan jadwal harian.
 - **Catatan** (`/belajar/catatan`): catatan markdown sederhana (judul, daftar, tebal, miring, kode, link).
 
-Panduan deploy ke Vercel, PWA, dan perawatan akan dilengkapi di fase berikutnya.
+## Deploy ke internet (GitHub + Vercel)
+
+### 1. Push ke GitHub
+
+1. Buat repository baru di https://github.com/new, misalnya `ulul-hub`. Pilih **Private**. Jangan centang
+   "Add a README" (repo harus kosong).
+2. Di terminal, dari folder project:
+
+   ```bash
+   git remote add origin https://github.com/<username>/ulul-hub.git
+   git push -u origin main
+   ```
+
+   `.env.local` tidak ikut ter-push (sudah ada di `.gitignore`). Cek dengan `git ls-files | grep env`:
+   yang boleh muncul hanya `.env.example`.
+
+### 2. Import ke Vercel
+
+1. Masuk ke https://vercel.com dengan akun GitHub (plan **Hobby**, gratis).
+2. **Add New → Project**, pilih repository `ulul-hub`, klik **Import**.
+3. Framework terdeteksi otomatis sebagai **Vite** (pengaturan build juga ada di `vercel.json`).
+4. Buka **Environment Variables**, tambahkan dua variabel yang sama dengan `.env.local`:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+5. Klik **Deploy**. Setelah selesai, kamu mendapat domain seperti `https://ulul-hub.vercel.app`.
+
+Mulai sekarang setiap `git push` ke `main` otomatis di-deploy ulang. Mengubah environment variable butuh
+deploy ulang manual: **Deployments → titik tiga di deployment terakhir → Redeploy**.
+
+### 3. Daftarkan domain Vercel di Supabase
+
+Tanpa langkah ini, link login di email akan mengarah ke localhost.
+
+**Supabase → Authentication → URL Configuration**:
+
+- **Site URL**: ganti menjadi `https://<domain-vercel>`.
+- **Redirect URLs**: tambahkan `https://<domain-vercel>/**` (biarkan `http://localhost:5173/**` untuk pengembangan).
+
+### Kenapa ada `vercel.json`?
+
+Aplikasi ini memakai React Router: alamat seperti `/keuangan/anggaran` hanya ada di JavaScript, bukan file
+di server. Tanpa aturan `rewrites`, me-refresh halaman itu memberi 404. Aturan
+`{ "source": "/(.*)", "destination": "/index.html" }` membuat semua alamat yang bukan file dilayani oleh
+`index.html`, lalu React Router menampilkan halaman yang benar. File asli (`/assets/...`, `/sw.js`,
+ikon) tetap dilayani langsung karena Vercel memeriksa file lebih dulu.
+
+`vercel.json` juga mengatur cache: `sw.js` selalu dicek ulang (supaya versi baru terdeteksi), sedangkan
+file di `/assets/` di-cache selamanya (namanya berubah setiap build).
+
+## Memasang di layar utama HP (PWA)
+
+- **Android (Chrome)**: buka domain Vercel, login, lalu menu **⋮ → Tambahkan ke layar utama**
+  (atau **Instal aplikasi**). Ulul Hub akan terbuka seperti aplikasi biasa, tanpa bilah alamat.
+- **iPhone (Safari)**: tombol **Bagikan → Tambahkan ke Layar Utama**.
+
+Login cukup sekali di aplikasi yang terpasang: masukkan email, lalu **ketik kode dari email** di layar
+"Cek email kamu" (jangan klik link-nya, karena link akan terbuka di browser, bukan di aplikasi).
+Kode ini butuh template email di langkah 5b.
+
+Kerangka aplikasi tersimpan offline, jadi aplikasi tetap terbuka tanpa internet, tetapi data selalu
+diambil dari Supabase (butuh internet). Saat ada versi baru, muncul banner **"Versi baru Ulul Hub
+tersedia"**; tekan **Muat ulang** untuk memakainya.
+
+## Catatan: project Supabase gratis bisa dijeda
+
+Supabase menjeda project gratis yang tidak ada aktivitas sekitar 7 hari. Data **tidak hilang**, tetapi
+aplikasi tidak bisa memuat data sampai project diaktifkan lagi.
+
+Mengaktifkan kembali: buka dashboard Supabase, pilih project, klik **Restore project**, tunggu beberapa menit.
+
+## Perawatan
+
+Update dependensi dengan aman (misalnya setahun sekali):
+
+```bash
+git switch -c update-dependensi
+npm outdated                 # lihat apa yang bisa diupdate
+npm update                   # update minor/patch sesuai lockfile
+npm test && npm run typecheck && npm run build
+npm run dev                  # coba manual: login, catat transaksi, centang taktik
+git commit -am "chore: update dependensi" && git push -u origin update-dependensi
+```
+
+Vercel membuat **preview deployment** untuk branch itu; cek dulu, lalu merge ke `main`. Untuk update versi
+mayor (misalnya React 20), lakukan satu paket per commit dan baca catatan rilisnya.

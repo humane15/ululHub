@@ -2,6 +2,19 @@
 
 Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan versi memakai [SemVer](https://semver.org/lang/id/).
 
+## [0.6.0] - 2026-10-05
+
+### Ditambahkan
+- PWA: manifest, ikon aplikasi (termasuk maskable dan apple-touch-icon), service worker untuk kerangka offline,
+  banner "Versi baru tersedia" (dicek tiap jam).
+- `vercel.json`: rewrite SPA, header keamanan dasar, cache `sw.js` dan `/assets/`.
+- Login dengan kode dari email (selain magic link) untuk aplikasi yang terpasang di HP.
+- README: panduan push ke GitHub, deploy Vercel, URL Supabase, memasang di HP, catatan jeda Supabase, perawatan.
+
+### Diubah
+- Ikon/favicon bawaan Vite diganti ikon Ulul Hub (sumber di `assets/`).
+- Halaman dimuat per rute (lazy) supaya pembukaan pertama lebih ringan.
+
 ## [0.5.0] - 2026-10-05
 
 ### Ditambahkan
