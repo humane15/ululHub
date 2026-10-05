@@ -83,6 +83,12 @@ Sekarang hanya email kamu yang bisa menerima link masuk.
   (contoh lengkap ada di akhir `20261005000001_skema_awal.sql`).
 - Jalankan migration baru di SQL Editor (atau `npx supabase db push`), lalu perbarui tipe di `src/db/types.ts`.
 
+## Beranda
+
+Satu layar untuk "hari ini aku harus apa": jalur belajar hari ini dan taktik minggu ini yang belum selesai
+(bisa dicentang langsung), skor minggu ini, sisa uang bulan ini, pos anggaran yang kuning/merah, dan tombol
+cepat **Catat pengeluaran**.
+
 ## Fitur keuangan
 
 - **Keuangan**: ringkasan bulan (sisa, pemasukan, pengeluaran, ditabung, rasio tabungan), navigasi bulan,
@@ -91,7 +97,10 @@ Sekarang hanya email kamu yang bisa menerima link masuk.
   bisa menyalin dari bulan sebelumnya. Mengubah satu bulan tidak mengubah bulan lain.
 - **Pos anggaran** berlaku untuk semua bulan. Jenis pos tidak bisa diubah setelah dibuat (supaya laporan lama tetap
   sama); pos yang sudah dipakai hanya bisa diarsipkan.
-- **Laporan**: tabel semua bulan, dihitung di database lewat view `monthly_totals`.
+- **Laporan**: grafik batang 6 bulan terakhir dan tabel semua bulan, dihitung di database lewat view `monthly_totals`.
+- **Ekspor CSV** transaksi per bulan (tombol di kartu Riwayat transaksi). Format: pemisah koma, UTF-8 dengan BOM,
+  jumlah berupa angka bulat tanpa pemisah ribuan. Kalau Excel menampilkan semuanya dalam satu kolom
+  (pengaturan regional Indonesia memakai titik koma), buka lewat **Data → From Text/CSV** dan pilih pemisah koma.
 
 ## Fitur rencana belajar
 
@@ -100,6 +109,7 @@ Sekarang hanya email kamu yang bisa menerima link masuk.
 - Setiap jalur punya topik, taktik (checklist), dan sumber yang bisa diedit langsung (tombol **Edit** di kartu).
 - **Skor eksekusi** = taktik selesai / total taktik minggu itu. Target 85%: hijau tercapai, kuning 60–84%, merah di bawahnya.
 - **Review mingguan** menyimpan skor minggu itu beserta catatan.
+- **Grafik skor** 12 minggu dengan garis target 85%.
 - **Siklus baru** (`/belajar/siklus-baru`): mulai kosong, salin struktur (jalur, jadwal, taktik tetap), atau salin
   lengkap (termasuk topik). Siklus aktif lama otomatis ditandai selesai, datanya tetap ada.
 - **Atur siklus** (`/belajar/atur`): nama, visi, jalur (warna, target, urutan), dan jadwal harian.

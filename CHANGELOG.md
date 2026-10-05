@@ -2,6 +2,16 @@
 
 Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan versi memakai [SemVer](https://semver.org/lang/id/).
 
+## [0.5.0] - 2026-10-05
+
+### Ditambahkan
+- Beranda gabungan: jalur belajar hari ini + taktik yang belum selesai (centang langsung, bisa dibatalkan),
+  skor minggu ini, sisa uang, pos kuning/merah, tombol cepat catat pengeluaran.
+- Grafik batang 6 bulan terakhir di Laporan dan grafik garis skor 12 minggu (target 85%) di Belajar,
+  memakai Recharts yang dimuat terpisah (lazy). Palet seri divalidasi untuk buta warna, mode terang dan gelap.
+- Ekspor CSV transaksi per bulan.
+- Fungsi murni baru + test: `monthlySeries`, `toCsv`, `scoreSeries`, `formatRupiahCompact`.
+
 ## [0.4.0] - 2026-10-05
 
 ### Ditambahkan

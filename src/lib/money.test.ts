@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  formatRupiahCompact,
   formatPercentBp,
   formatRupiah,
   formatRupiahInput,
@@ -82,5 +83,17 @@ describe('ratioBp dan formatPercentBp', () => {
     expect(formatPercentBp(8500, 0)).toBe('85%')
     expect(formatPercentBp(1000, 0)).toBe('10%')
     expect(formatPercentBp(null)).toBe('–')
+  })
+})
+
+describe('formatRupiahCompact', () => {
+  it('ribuan, jutaan, miliar', () => {
+    expect(formatRupiahCompact(0)).toBe('0')
+    expect(formatRupiahCompact(750)).toBe('750')
+    expect(formatRupiahCompact(500_000)).toBe('500 rb')
+    expect(formatRupiahCompact(1_200_000)).toBe('1,2 jt')
+    expect(formatRupiahCompact(4_000_000)).toBe('4 jt')
+    expect(formatRupiahCompact(2_500_000_000)).toBe('2,5 M')
+    expect(formatRupiahCompact(-1_250_000)).toBe('-1,3 jt')
   })
 })

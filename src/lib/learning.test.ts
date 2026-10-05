@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { cycleStats, initialWeekView, nextSortOrder, tacticProgress } from './learning'
+import { cycleStats, initialWeekView, nextSortOrder, scoreSeries, tacticProgress } from './learning'
 
 describe('initialWeekView', () => {
   it('mengikuti posisi siklus', () => {
@@ -39,5 +39,20 @@ describe('nextSortOrder', () => {
   it('max + 1, mulai dari 1', () => {
     expect(nextSortOrder([])).toBe(1)
     expect(nextSortOrder([{ sort_order: 3 }, { sort_order: 100 }])).toBe(101)
+  })
+})
+
+describe('scoreSeries', () => {
+  it('minggu yang belum berjalan dikosongkan', () => {
+    const weekly = [80, 90, null, 50, ...new Array<number | null>(8).fill(0)]
+    const series = scoreSeries(weekly, 4)
+    expect(series).toHaveLength(12)
+    expect(series.slice(0, 5)).toEqual([
+      { week: 1, score: 80 },
+      { week: 2, score: 90 },
+      { week: 3, score: null },
+      { week: 4, score: 50 },
+      { week: 5, score: null },
+    ])
   })
 })

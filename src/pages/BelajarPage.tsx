@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
-import { EmptyState, ErrorMessage, PageHeader } from '../components/ui'
+import { LazyScoreLineChart } from '../components/charts'
+import { Card, EmptyState, ErrorMessage, PageHeader } from '../components/ui'
 import { getActiveCycle, getCycleDetail, type CycleDetail } from '../db/learning'
 import type { LearningCycle } from '../db/types'
 import { useQuery, type QueryState } from '../db/useQuery'
@@ -22,7 +23,7 @@ import {
   type CyclePosition,
   type ISODate,
 } from '../lib/dates'
-import { initialWeekView, tacticProgress, type WeekView } from '../lib/learning'
+import { initialWeekView, scoreSeries, tacticProgress, type WeekView } from '../lib/learning'
 import { weeklyScores } from '../lib/scoring'
 
 const linkClass = 'rounded-lg border border-border bg-surface px-3 py-1.5 text-sm font-medium hover:bg-surface-2'
@@ -152,6 +153,13 @@ function ActiveCycle({
             actions={actions}
             onReload={query.reload}
           />
+        )}
+
+        {elapsedWeeks > 0 && (
+          <Card>
+            <h2 className="mb-3 font-semibold">Grafik skor 12 minggu</h2>
+            <LazyScoreLineChart data={scoreSeries(scores, elapsedWeeks)} />
+          </Card>
         )}
       </div>
     </>

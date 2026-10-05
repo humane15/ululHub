@@ -52,3 +52,17 @@ export function cycleStats(tactics: readonly TacticLike[], target: number): Cycl
 export function nextSortOrder(items: readonly { sort_order: number }[]): number {
   return items.reduce((max, i) => Math.max(max, i.sort_order), 0) + 1
 }
+
+export interface ScorePoint {
+  week: number
+  /** null = minggu belum berjalan atau belum ada taktik (garis terputus). */
+  score: number | null
+}
+
+/** Data grafik skor 12 minggu; minggu setelah `elapsedWeeks` dikosongkan. */
+export function scoreSeries(weekly: readonly (number | null)[], elapsedWeeks: number): ScorePoint[] {
+  return Array.from({ length: CYCLE_WEEKS }, (_, i) => ({
+    week: i + 1,
+    score: i < elapsedWeeks ? (weekly[i] ?? null) : null,
+  }))
+}

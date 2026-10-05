@@ -1,9 +1,11 @@
 import { Link } from 'react-router'
+import { LazyMonthlyBarChart } from '../components/charts'
 import { Card, EmptyState, ErrorMessage, PageHeader } from '../components/ui'
 import { listMonthlyTotals } from '../db/finance'
 import { useQuery } from '../db/useQuery'
 import { summaryFromTotals } from '../lib/budget'
-import { formatBulan, toMonthParam } from '../lib/dates'
+import { formatBulan, monthStart, todayJakarta, toMonthParam } from '../lib/dates'
+import { monthlySeries } from '../lib/report'
 import { formatPercentBp, formatRupiah } from '../lib/money'
 
 export default function LaporanPage() {
@@ -20,6 +22,18 @@ export default function LaporanPage() {
       {!query.data && !query.error && <p className="text-sm text-muted">Memuat…</p>}
       {query.data && rows.length === 0 && (
         <EmptyState title="Belum ada laporan." description="Laporan muncul setelah ada transaksi yang tercatat." />
+      )}
+      {rows.length > 0 && (
+        <Card className="mb-4">
+          <h2 className="mb-3 font-semibold">6 bulan terakhir</h2>
+          <LazyMonthlyBarChart
+            data={monthlySeries(
+              (query.data ?? []).map((t) => ({ month: t.month, income: t.income, totalOut: t.total_out, saved: t.saved })),
+              monthStart(todayJakarta()),
+              6,
+            )}
+          />
+        </Card>
       )}
       {rows.length > 0 && (
         <Card className="overflow-x-auto p-0">

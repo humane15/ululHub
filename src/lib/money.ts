@@ -70,3 +70,15 @@ export function formatPercentBp(bp: BasisPoints | null, fractionDigits = 1): str
   if (text.includes('.')) text = text.replace(/\.?0+$/, '')
   return `${text.replace('.', ',')}%`
 }
+
+/** Ringkas untuk sumbu grafik: 1200000 -> "1,2 jt", 500000 -> "500 rb", 0 -> "0". */
+export function formatRupiahCompact(value: number): string {
+  assertRupiah(value)
+  const abs = Math.abs(value)
+  const sign = value < 0 ? '-' : ''
+  const fmt = (n: number) => String(Math.round(n * 10) / 10).replace('.', ',')
+  if (abs >= 1_000_000_000) return `${sign}${fmt(abs / 1_000_000_000)} M`
+  if (abs >= 1_000_000) return `${sign}${fmt(abs / 1_000_000)} jt`
+  if (abs >= 1_000) return `${sign}${fmt(abs / 1_000)} rb`
+  return `${sign}${abs}`
+}

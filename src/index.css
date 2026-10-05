@@ -13,6 +13,10 @@
   --c-ok: #16a34a;
   --c-warn: #ca8a04;
   --c-bad: #dc2626;
+  /* Seri grafik (palet tervalidasi untuk buta warna, lihat src/components/charts) */
+  --c-series-1: #2a78d6;
+  --c-series-2: #eb6834;
+  --c-series-3: #1baf7a;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -28,6 +32,9 @@
     --c-ok: #4ade80;
     --c-warn: #facc15;
     --c-bad: #f87171;
+    --c-series-1: #3987e5;
+    --c-series-2: #d95926;
+    --c-series-3: #199e70;
   }
 }
 
@@ -43,6 +50,9 @@
   --color-ok: var(--c-ok);
   --color-warn: var(--c-warn);
   --color-bad: var(--c-bad);
+  --color-series-1: var(--c-series-1);
+  --color-series-2: var(--c-series-2);
+  --color-series-3: var(--c-series-3);
 }
 
 @layer base {

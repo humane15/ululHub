@@ -8,6 +8,7 @@ import { getMonthBudget, listCategories, listMonthTransactions, toCategoryLike }
 import type { Transaction } from '../db/types'
 import { useQuery } from '../db/useQuery'
 import { BudgetControl } from '../features/finance/BudgetControl'
+import { downloadText, transactionsCsv } from '../features/finance/exportCsv'
 import { MonthSummaryCard } from '../features/finance/MonthSummaryCard'
 import { TransactionForm, type TransactionDraft } from '../features/finance/TransactionForm'
 import { TransactionList } from '../features/finance/TransactionList'
@@ -151,7 +152,20 @@ export default function KeuanganPage() {
             </Card>
 
             <Card>
-              <h2 className="mb-2 font-semibold">Riwayat transaksi</h2>
+              <div className="mb-2 flex items-center justify-between">
+                <h2 className="font-semibold">Riwayat transaksi</h2>
+                {data.transactions.length > 0 && (
+                  <button
+                    type="button"
+                    className="text-sm font-medium text-primary"
+                    onClick={() =>
+                      downloadText(`transaksi-${toMonthParam(month)}.csv`, transactionsCsv(data.transactions, view.byId))
+                    }
+                  >
+                    Ekspor CSV
+                  </button>
+                )}
+              </div>
               {data.transactions.length === 0 ? (
                 <EmptyState title="Belum ada transaksi bulan ini." description="Mulai dengan mencatat gaji." />
               ) : (
