@@ -1,26 +1,10 @@
 import type { CategoryLike, CategoryType } from '../lib/budget'
 import { monthRange, type ISODate } from '../lib/dates'
+import { DbError, FK_VIOLATION, fail } from './errors'
 import { supabase } from './supabase'
 import type { BudgetCategory, BudgetMonth, Database, MonthlyTotal, Transaction } from './types'
 
 type TransactionInsert = Database['public']['Tables']['transactions']['Insert']
-
-/** Kode Postgres foreign_key_violation (data masih dirujuk). */
-const FK_VIOLATION = '23503'
-
-/** Error dengan pesan Bahasa Indonesia untuk ditampilkan. */
-export class DbError extends Error {
-  readonly code: string | undefined
-  constructor(message: string, code?: string) {
-    super(message)
-    this.name = 'DbError'
-    this.code = code
-  }
-}
-
-function fail(error: { message: string; code?: string }): never {
-  throw new DbError(error.message, error.code)
-}
 
 export function toCategoryLike(c: BudgetCategory): CategoryLike {
   return { id: c.id, name: c.name, type: c.type, sortOrder: c.sort_order, archived: c.archived_at !== null }

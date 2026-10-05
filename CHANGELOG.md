@@ -2,6 +2,19 @@
 
 Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan versi memakai [SemVer](https://semver.org/lang/id/).
 
+## [0.4.0] - 2026-10-05
+
+### Ditambahkan
+- Halaman Belajar: siklus aktif dan minggu berjalan otomatis, pemilih minggu 1–12 berwarna skor, evaluasi minggu ke-13,
+  ajakan membuat siklus kalau belum ada.
+- Kartu per jalur: topik, checklist taktik (centang langsung tersimpan), sumber; semuanya bisa diedit.
+- Taktik tetap, skor eksekusi dengan penanda target 85%, review mingguan.
+- Jadwal harian (hari ini ditandai) dan pengaturannya.
+- Siklus baru dengan 3 pilihan isi lewat fungsi `create_learning_cycle` (migration `20261005000004`).
+- Atur siklus: nama, visi, jalur (tambah, edit, urutkan, hapus dengan konfirmasi).
+- Catatan markdown (parser sendiri, tanpa HTML mentah; link hanya http/https/mailto).
+- Fungsi murni baru + test: `src/lib/learning.ts`, `src/lib/markdown.ts`.
+
 ## [0.3.0] - 2026-10-05
 
 ### Ditambahkan

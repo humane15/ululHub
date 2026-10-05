@@ -6,6 +6,8 @@ export interface QueryState<T> {
   loading: boolean
   /** Muat ulang (misalnya setelah menyimpan). Data lama tetap tampil selama memuat. */
   reload: () => void
+  /** Ubah data lokal langsung (optimistic update) tanpa memuat ulang. */
+  mutate: (updater: (prev: T) => T) => void
 }
 
 /** Memuat data async. `fn` dijalankan ulang setiap `deps` berubah. */
@@ -34,5 +36,6 @@ export function useQuery<T>(fn: () => Promise<T>, deps: DependencyList): QuerySt
   }, [...deps, version])
 
   const reload = useCallback(() => setVersion((v) => v + 1), [])
-  return { data, error, loading, reload }
+  const mutate = useCallback((updater: (prev: T) => T) => setData((prev) => (prev === undefined ? prev : updater(prev))), [])
+  return { data, error, loading, reload, mutate }
 }

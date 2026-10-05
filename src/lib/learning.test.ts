@@ -1,0 +1,43 @@
+import { describe, expect, it } from 'vitest'
+import { cycleStats, initialWeekView, nextSortOrder, tacticProgress } from './learning'
+
+describe('initialWeekView', () => {
+  it('mengikuti posisi siklus', () => {
+    expect(initialWeekView({ kind: 'belum_mulai', daysUntilStart: 3 })).toEqual({ kind: 'minggu', week: 1 })
+    expect(initialWeekView({ kind: 'minggu', week: 7 })).toEqual({ kind: 'minggu', week: 7 })
+    expect(initialWeekView({ kind: 'evaluasi' })).toEqual({ kind: 'evaluasi' })
+    expect(initialWeekView({ kind: 'selesai', daysSinceEnd: 10 })).toEqual({ kind: 'evaluasi' })
+  })
+})
+
+describe('tacticProgress', () => {
+  it('menghitung selesai, total, skor', () => {
+    expect(tacticProgress([{ done: true }, { done: false }, { done: true }])).toEqual({ done: 2, total: 3, score: 67 })
+    expect(tacticProgress([])).toEqual({ done: 0, total: 0, score: null })
+  })
+})
+
+describe('cycleStats', () => {
+  it('rata-rata dan minggu yang mencapai target', () => {
+    const tactics = [
+      { weekNumber: 1, done: true },
+      { weekNumber: 1, done: true },
+      { weekNumber: 2, done: true },
+      { weekNumber: 2, done: false },
+    ]
+    const stats = cycleStats(tactics, 85)
+    expect(stats.weekly.slice(0, 3)).toEqual([100, 50, null])
+    expect(stats.weekly).toHaveLength(12)
+    expect(stats.average).toBe(75)
+    expect(stats.weeksOnTarget).toBe(1)
+    expect(stats.done).toBe(3)
+    expect(stats.total).toBe(4)
+  })
+})
+
+describe('nextSortOrder', () => {
+  it('max + 1, mulai dari 1', () => {
+    expect(nextSortOrder([])).toBe(1)
+    expect(nextSortOrder([{ sort_order: 3 }, { sort_order: 100 }])).toBe(101)
+  })
+})

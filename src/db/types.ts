@@ -184,6 +184,10 @@ export type Database = {
         Args: { p_month: ISODate; p_cycle_start: ISODate; p_cycle_name: string }
         Returns: UUID
       }
+      create_learning_cycle: {
+        Args: { p_name: string; p_start: ISODate; p_vision: string; p_source: UUID | null; p_mode: string }
+        Returns: UUID
+      }
     }
     Enums: { [_ in never]: never }
     CompositeTypes: { [_ in never]: never }

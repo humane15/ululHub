@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router'
-import { ChevronLeftIcon } from '../components/icons'
+import { BackLink } from '../components/BackLink'
 import { MonthNav } from '../components/MonthNav'
 import { Button, Card, ErrorMessage, PageHeader } from '../components/ui'
 import { createMonthBudget, getMonthBudget, getPreviousMonthBudget, listCategories } from '../db/finance'
@@ -42,13 +41,7 @@ export default function AnggaranPage() {
 
   return (
     <>
-      <Link
-        to={`/keuangan?bulan=${toMonthParam(month)}`}
-        className="mb-2 inline-flex items-center gap-1 text-sm font-medium text-muted hover:text-text"
-      >
-        <ChevronLeftIcon className="size-4" />
-        Keuangan
-      </Link>
+      <BackLink to={`/keuangan?bulan=${toMonthParam(month)}`} label="Keuangan" />
       <PageHeader title="Atur anggaran" subtitle="Zero based budget: setiap rupiah punya pos" actions={<MonthNav month={month} onChange={setMonth} />} />
 
       {query.error && <ErrorMessage error={query.error} onRetry={query.reload} />}

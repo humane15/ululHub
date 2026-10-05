@@ -29,7 +29,7 @@ npm run build      # build produksi ke dist/
 Buka **SQL Editor → New query**, lalu jalankan file di `supabase/migrations/` **satu per satu sesuai urutan nama file**:
 
 1. Salin isi `20261005000001_skema_awal.sql`, tempel, klik **Run**.
-2. Ulangi untuk `20261005000002_fungsi_data_awal.sql`, lalu file berikutnya (`20261005000003_view_total_bulanan.sql`, dst).
+2. Ulangi untuk `20261005000002_fungsi_data_awal.sql`, lalu file berikutnya (`20261005000003_view_total_bulanan.sql`, `20261005000004_fungsi_buat_siklus.sql`, dst).
 
 Sudah pernah menjalankan sebagian? Cukup jalankan file yang **belum** pernah dijalankan, sesuai urutan.
 
@@ -92,5 +92,17 @@ Sekarang hanya email kamu yang bisa menerima link masuk.
 - **Pos anggaran** berlaku untuk semua bulan. Jenis pos tidak bisa diubah setelah dibuat (supaya laporan lama tetap
   sama); pos yang sudah dipakai hanya bisa diarsipkan.
 - **Laporan**: tabel semua bulan, dihitung di database lewat view `monthly_totals`.
+
+## Fitur rencana belajar
+
+- **Belajar**: siklus aktif dan minggu berjalan dipilih otomatis dari tanggal hari ini; pemilih minggu 1–12 dengan
+  warna skor; minggu ke-13 menampilkan evaluasi siklus. Tanpa siklus aktif, muncul ajakan membuat siklus baru.
+- Setiap jalur punya topik, taktik (checklist), dan sumber yang bisa diedit langsung (tombol **Edit** di kartu).
+- **Skor eksekusi** = taktik selesai / total taktik minggu itu. Target 85%: hijau tercapai, kuning 60–84%, merah di bawahnya.
+- **Review mingguan** menyimpan skor minggu itu beserta catatan.
+- **Siklus baru** (`/belajar/siklus-baru`): mulai kosong, salin struktur (jalur, jadwal, taktik tetap), atau salin
+  lengkap (termasuk topik). Siklus aktif lama otomatis ditandai selesai, datanya tetap ada.
+- **Atur siklus** (`/belajar/atur`): nama, visi, jalur (warna, target, urutan), dan jadwal harian.
+- **Catatan** (`/belajar/catatan`): catatan markdown sederhana (judul, daftar, tebal, miring, kode, link).
 
 Panduan deploy ke Vercel, PWA, dan perawatan akan dilengkapi di fase berikutnya.
