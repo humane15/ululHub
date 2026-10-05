@@ -7,16 +7,19 @@ import {
   cycleRestEndDate,
   cycleWeekRange,
   daysInMonth,
+  defaultCycleName,
   diffDays,
   formatBulan,
   formatTanggal,
   isLeapYear,
   isMonday,
   isValidISODate,
+  mondayOnOrAfter,
   mondayOnOrBefore,
   monthRange,
   monthStart,
   namaHari,
+  quarterOf,
   todayJakarta,
   weekdayIso,
   yearRange,
@@ -136,5 +139,29 @@ describe('format tampilan', () => {
     expect(formatTanggal('2026-10-05')).toBe('5 Oktober 2026')
     expect(formatTanggal('2026-10-05', { short: true })).toBe('5 Okt 2026')
     expect(formatBulan('2027-01-01')).toBe('Januari 2027')
+  })
+})
+
+describe('Senin terdekat dan kuartal', () => {
+  it('mondayOnOrAfter tidak bergeser kalau sudah Senin', () => {
+    expect(mondayOnOrAfter('2026-10-05')).toBe('2026-10-05')
+  })
+
+  it('mondayOnOrAfter melewati pergantian tahun', () => {
+    expect(mondayOnOrAfter('2026-12-30')).toBe('2027-01-04')
+    expect(mondayOnOrAfter('2027-01-03')).toBe('2027-01-04') // Minggu
+  })
+
+  it('quarterOf', () => {
+    expect(quarterOf('2026-01-01')).toBe(1)
+    expect(quarterOf('2026-03-31')).toBe(1)
+    expect(quarterOf('2026-04-01')).toBe(2)
+    expect(quarterOf('2026-10-05')).toBe(4)
+    expect(quarterOf('2026-12-31')).toBe(4)
+  })
+
+  it('defaultCycleName', () => {
+    expect(defaultCycleName(1, '2026-10-05')).toBe('Siklus 1: Q4 2026')
+    expect(defaultCycleName(2, '2027-01-04')).toBe('Siklus 2: Q1 2027')
   })
 })

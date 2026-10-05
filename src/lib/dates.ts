@@ -94,6 +94,16 @@ export function mondayOnOrBefore(value: ISODate): ISODate {
   return addDays(value, 1 - weekdayIso(value))
 }
 
+/** Senin pada minggu yang sama atau sesudahnya. */
+export function mondayOnOrAfter(value: ISODate): ISODate {
+  return addDays(value, (8 - weekdayIso(value)) % 7)
+}
+
+/** Kuartal 1..4. */
+export function quarterOf(value: ISODate): number {
+  return Math.ceil(parseISODate(value).month / 3)
+}
+
 /** Tanggal 1 pada bulan yang sama. */
 export function monthStart(value: ISODate): ISODate {
   const { year, month } = parseISODate(value)
@@ -139,6 +149,11 @@ export function cycleEndDate(startDate: ISODate): ISODate {
 /** Hari terakhir minggu ke-13 (akhir evaluasi). */
 export function cycleRestEndDate(startDate: ISODate): ISODate {
   return addDays(startDate, CYCLE_TOTAL_WEEKS * 7 - 1)
+}
+
+/** Nama bawaan siklus: (1, "2026-10-05") -> "Siklus 1: Q4 2026". */
+export function defaultCycleName(sequence: number, startDate: ISODate): string {
+  return `Siklus ${sequence}: Q${quarterOf(startDate)} ${parseISODate(startDate).year}`
 }
 
 export type CyclePosition =

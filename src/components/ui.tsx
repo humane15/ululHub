@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
 export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: ReactNode }) {
   return (
@@ -22,6 +22,40 @@ export function EmptyState({ title, description, action }: { title: string; desc
       <p className="font-medium">{title}</p>
       {description && <p className="mx-auto mt-1 max-w-sm text-sm text-muted">{description}</p>}
       {action && <div className="mt-4">{action}</div>}
+    </div>
+  )
+}
+
+export const inputClass =
+  'w-full rounded-lg border border-border bg-bg px-3 py-2 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 disabled:opacity-60'
+
+type ButtonVariant = 'primary' | 'secondary' | 'danger'
+
+const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
+  primary: 'bg-primary text-white hover:opacity-90 dark:text-slate-950',
+  secondary: 'border border-border bg-surface hover:bg-surface-2',
+  danger: 'bg-bad text-white hover:opacity-90 dark:text-slate-950',
+}
+
+export function Button({
+  variant = 'primary',
+  className = '',
+  type = 'button',
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant }) {
+  return (
+    <button
+      type={type}
+      className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-opacity disabled:cursor-not-allowed disabled:opacity-60 ${BUTTON_VARIANTS[variant]} ${className}`}
+      {...props}
+    />
+  )
+}
+
+export function LoadingScreen() {
+  return (
+    <div className="flex min-h-dvh items-center justify-center" role="status">
+      <span className="text-sm text-muted">Memuat…</span>
     </div>
   )
 }
