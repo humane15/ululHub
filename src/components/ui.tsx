@@ -59,3 +59,35 @@ export function LoadingScreen() {
     </div>
   )
 }
+
+const BAR_COLORS = { ok: 'bg-ok', warn: 'bg-warn', bad: 'bg-bad', primary: 'bg-primary' } as const
+
+/** Progress bar; `valueBp` 0..10000. */
+export function ProgressBar({ valueBp, tone, label }: { valueBp: number; tone: keyof typeof BAR_COLORS; label: string }) {
+  return (
+    <div
+      className="h-2 overflow-hidden rounded-full bg-surface-2"
+      role="progressbar"
+      aria-label={label}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(valueBp / 100)}
+    >
+      <div className={`h-full rounded-full ${BAR_COLORS[tone]}`} style={{ width: `${valueBp / 100}%` }} />
+    </div>
+  )
+}
+
+export function ErrorMessage({ error, onRetry }: { error: Error; onRetry?: () => void }) {
+  return (
+    <div role="alert" className="rounded-2xl border border-bad/40 bg-bad/10 p-4 text-sm">
+      <p className="font-medium text-bad">Gagal memuat data</p>
+      <p className="mt-1 text-muted">{error.message}</p>
+      {onRetry && (
+        <button type="button" onClick={onRetry} className="mt-2 font-medium text-primary">
+          Coba lagi
+        </button>
+      )}
+    </div>
+  )
+}

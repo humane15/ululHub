@@ -141,6 +141,17 @@ export type Note = {
   updated_at: Timestamp
 }
 
+/** View monthly_totals: total per bulan untuk laporan. */
+export type MonthlyTotal = {
+  user_id: UUID
+  /** Tanggal 1. */
+  month: ISODate
+  income: number
+  total_out: number
+  saved: number
+  transaction_count: number
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -165,7 +176,9 @@ export type Database = {
       study_schedule: Table<StudySchedule, 'id' | 'user_id' | 'track_id'>
       notes: Table<Note, 'id' | 'user_id' | 'title' | 'body' | 'sort_order' | 'created_at' | 'updated_at'>
     }
-    Views: { [_ in never]: never }
+    Views: {
+      monthly_totals: { Row: MonthlyTotal; Relationships: [] }
+    }
     Functions: {
       seed_initial_data: {
         Args: { p_month: ISODate; p_cycle_start: ISODate; p_cycle_name: string }

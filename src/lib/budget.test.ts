@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
   allocationCheck,
+  budgetControlRows,
   categoryUsage,
   spentByCategory,
+  savingsDepositSuggestion,
   summarizeMonth,
+  summaryFromTotals,
+  type CategoryLike,
   type CategoryType,
   type TransactionLike,
 } from './budget'
@@ -127,5 +131,64 @@ describe('allocationCheck', () => {
 
   it('memberi tahu kelebihan alokasi', () => {
     expect(allocationCheck(3_800_000, dataAwal)).toMatchObject({ status: 'lebih', difference: -100_000 })
+  })
+})
+
+describe('summaryFromTotals', () => {
+  it('sama dengan summarizeMonth untuk data yang sama', () => {
+    expect(summaryFromTotals({ income: 3_900_000, totalOut: 1_800_000, saved: 1_200_000 })).toEqual({
+      income: 3_900_000,
+      totalOut: 1_800_000,
+      saved: 1_200_000,
+      spending: 600_000,
+      remaining: 2_100_000,
+      savingsRatioBp: 3077,
+    })
+  })
+
+  it('rasio null tanpa pemasukan, sisa bisa negatif', () => {
+    const s = summaryFromTotals({ income: 0, totalOut: 50_000, saved: 0 })
+    expect(s.savingsRatioBp).toBeNull()
+    expect(s.remaining).toBe(-50_000)
+  })
+})
+
+describe('budgetControlRows', () => {
+  const cats: CategoryLike[] = [
+    { id: 'makan', name: 'Makan', type: 'kebutuhan', sortOrder: 2, archived: false },
+    { id: 'tab', name: 'Tabungan', type: 'tabungan', sortOrder: 1, archived: false },
+    { id: 'jajan', name: 'Jajan', type: 'keinginan', sortOrder: 3, archived: false },
+    { id: 'lama', name: 'Lama', type: 'keinginan', sortOrder: 4, archived: true },
+  ]
+
+  it('hanya pos beranggaran atau terpakai, urut sort_order', () => {
+    const rows = budgetControlRows(
+      cats,
+      new Map([
+        ['makan', 1_000_000],
+        ['tab', 1_200_000],
+      ]),
+      new Map([
+        ['makan', 900_000],
+        ['lama', 20_000],
+      ]),
+    )
+    expect(rows.map((r) => r.category.id)).toEqual(['tab', 'makan', 'lama'])
+    expect(rows[1]!.usage).toMatchObject({ kind: 'pengeluaran', status: 'waspada' })
+    // Terpakai tanpa anggaran = lewat batas.
+    expect(rows[2]!.usage).toMatchObject({ kind: 'pengeluaran', limit: 0, status: 'lewat' })
+    expect(rows[0]!.usage).toMatchObject({ kind: 'tabungan', shortfall: 1_200_000 })
+  })
+})
+
+describe('savingsDepositSuggestion', () => {
+  it('sisa kekurangan', () => {
+    expect(savingsDepositSuggestion(1_200_000, 0)).toBe(1_200_000)
+    expect(savingsDepositSuggestion(1_200_000, 500_000)).toBe(700_000)
+  })
+
+  it('target penuh kalau sudah tercapai', () => {
+    expect(savingsDepositSuggestion(1_200_000, 1_200_000)).toBe(1_200_000)
+    expect(savingsDepositSuggestion(1_200_000, 1_500_000)).toBe(1_200_000)
   })
 })

@@ -125,6 +125,23 @@ export function monthRange(value: ISODate): { start: ISODate; end: ISODate } {
   return { start, end: addMonths(start, 1) }
 }
 
+/** Parameter URL bulan: "2026-10" -> "2026-10-01". null kalau tidak valid. */
+export function parseMonthParam(value: string | null): ISODate | null {
+  if (!value || !/^\d{4}-\d{2}$/.test(value)) return null
+  const iso = `${value}-01`
+  return isValidISODate(iso) ? iso : null
+}
+
+/** "2026-10-15" -> "2026-10" */
+export function toMonthParam(value: ISODate): string {
+  return monthStart(value).slice(0, 7)
+}
+
+/** Tanggal bawaan untuk transaksi baru: hari ini kalau di bulan itu, selain itu tanggal 1. */
+export function defaultDateInMonth(month: ISODate, today: ISODate): ISODate {
+  return monthStart(today) === monthStart(month) ? today : monthStart(month)
+}
+
 /** Rentang query satu tahun: start inklusif, end eksklusif. */
 export function yearRange(year: number): { start: ISODate; end: ISODate } {
   return { start: makeISODate(year, 1, 1), end: makeISODate(year + 1, 1, 1) }

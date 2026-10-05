@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router'
+import AnggaranPage from './pages/AnggaranPage'
 import { AppLayout } from './components/AppLayout'
 import { LoadingScreen } from './components/ui'
 import { isSupabaseConfigured } from './db/supabase'
@@ -22,6 +23,7 @@ function AuthGate() {
       <Route element={<AppLayout />}>
         <Route index element={<BerandaPage />} />
         <Route path="keuangan" element={<KeuanganPage />} />
+        <Route path="keuangan/anggaran" element={<AnggaranPage />} />
         <Route path="belajar" element={<BelajarPage />} />
         <Route path="laporan" element={<LaporanPage />} />
         <Route path="pengaturan" element={<PengaturanPage />} />

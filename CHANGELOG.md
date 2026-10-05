@@ -2,6 +2,17 @@
 
 Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan versi memakai [SemVer](https://semver.org/lang/id/).
 
+## [0.3.0] - 2026-10-05
+
+### Ditambahkan
+- Halaman Keuangan: ringkasan bulan dengan navigasi bulan (`?bulan=YYYY-MM`), catat/edit/hapus transaksi
+  (konfirmasi hapus di dalam halaman), tombol cepat "Catat gaji" dan "Setor tabungan", kontrol anggaran per pos.
+- Halaman Atur anggaran: zero based budget per bulan, salin anggaran dari bulan sebelumnya, kelola pos
+  (tambah, ganti nama, urutkan, arsipkan, pulihkan, hapus kalau belum dipakai).
+- Laporan bulanan (tabel) dari view baru `monthly_totals` (migration `20261005000003`).
+- Fungsi murni baru + test: `summaryFromTotals`, `budgetControlRows`, `savingsDepositSuggestion`,
+  `parseMonthParam`, `toMonthParam`, `defaultDateInMonth`.
+
 ## [0.2.0] - 2026-10-05
 
 ### Ditambahkan

@@ -40,6 +40,12 @@ export function summarizeMonth(
       .filter((t) => t.categoryId !== null && categoryTypes.get(t.categoryId) === 'tabungan')
       .map((t) => t.amount),
   )
+  return summaryFromTotals({ income, totalOut, saved })
+}
+
+/** Ringkasan dari total yang sudah dijumlahkan (misalnya dari view monthly_totals). */
+export function summaryFromTotals(totals: { income: number; totalOut: number; saved: number }): MonthSummary {
+  const { income, totalOut, saved } = totals
   return {
     income,
     totalOut,
@@ -137,4 +143,41 @@ export function allocationCheck(income: number, itemAmounts: readonly number[]):
   const status: AllocationStatus =
     difference === 0 ? 'pas' : difference > 0 ? 'belum_teralokasi' : 'lebih'
   return { income, allocated, difference, status }
+}
+
+export interface CategoryLike {
+  id: string
+  name: string
+  type: CategoryType
+  sortOrder: number
+  archived: boolean
+}
+
+export interface BudgetControlRow {
+  category: CategoryLike
+  usage: CategoryUsage
+}
+
+/**
+ * Baris kontrol anggaran satu bulan: pos yang punya anggaran atau sudah terpakai,
+ * urut sesuai sort_order. Pos terpakai tanpa anggaran dihitung dengan batas 0.
+ */
+export function budgetControlRows(
+  categories: readonly CategoryLike[],
+  budgetByCategory: ReadonlyMap<string, number>,
+  spent: ReadonlyMap<string, number>,
+): BudgetControlRow[] {
+  return [...categories]
+    .filter((c) => budgetByCategory.has(c.id) || (spent.get(c.id) ?? 0) > 0)
+    .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, 'id'))
+    .map((category) => ({
+      category,
+      usage: categoryUsage(category.type, budgetByCategory.get(category.id) ?? 0, spent.get(category.id) ?? 0),
+    }))
+}
+
+/** Nominal tombol "Setor tabungan": sisa kekurangan bulan ini, atau target penuh kalau sudah tercapai. */
+export function savingsDepositSuggestion(target: number, savedThisMonth: number): number {
+  const shortfall = target - savedThisMonth
+  return shortfall > 0 ? shortfall : target
 }

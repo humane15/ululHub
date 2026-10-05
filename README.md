@@ -29,9 +29,11 @@ npm run build      # build produksi ke dist/
 Buka **SQL Editor → New query**, lalu jalankan file di `supabase/migrations/` **satu per satu sesuai urutan nama file**:
 
 1. Salin isi `20261005000001_skema_awal.sql`, tempel, klik **Run**.
-2. Ulangi untuk `20261005000002_fungsi_data_awal.sql`.
+2. Ulangi untuk `20261005000002_fungsi_data_awal.sql`, lalu file berikutnya (`20261005000003_view_total_bulanan.sql`, dst).
 
-Cek di **Table Editor**: harus ada 11 tabel, semuanya berlabel RLS aktif.
+Sudah pernah menjalankan sebagian? Cukup jalankan file yang **belum** pernah dijalankan, sesuai urutan.
+
+Cek di **Table Editor**: harus ada 11 tabel (semuanya berlabel RLS aktif) dan view `monthly_totals`.
 
 > Alternatif lewat CLI: `npx supabase login`, `npx supabase link --project-ref <ref>`, lalu `npx supabase db push`.
 
@@ -80,5 +82,15 @@ Sekarang hanya email kamu yang bisa menerima link masuk.
   `alter table ... enable row level security`, dan kebijakan `user_id = (select auth.uid())`
   (contoh lengkap ada di akhir `20261005000001_skema_awal.sql`).
 - Jalankan migration baru di SQL Editor (atau `npx supabase db push`), lalu perbarui tipe di `src/db/types.ts`.
+
+## Fitur keuangan
+
+- **Keuangan**: ringkasan bulan (sisa, pemasukan, pengeluaran, ditabung, rasio tabungan), navigasi bulan,
+  catat/edit/hapus transaksi, tombol cepat *Catat gaji* dan *Setor tabungan*, kontrol anggaran per pos.
+- **Atur anggaran** (`/keuangan/anggaran`): anggaran per bulan dengan metode zero based. Bulan tanpa anggaran
+  bisa menyalin dari bulan sebelumnya. Mengubah satu bulan tidak mengubah bulan lain.
+- **Pos anggaran** berlaku untuk semua bulan. Jenis pos tidak bisa diubah setelah dibuat (supaya laporan lama tetap
+  sama); pos yang sudah dipakai hanya bisa diarsipkan.
+- **Laporan**: tabel semua bulan, dihitung di database lewat view `monthly_totals`.
 
 Panduan deploy ke Vercel, PWA, dan perawatan akan dilengkapi di fase berikutnya.

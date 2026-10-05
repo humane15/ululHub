@@ -8,6 +8,7 @@ import {
   cycleWeekRange,
   daysInMonth,
   defaultCycleName,
+  defaultDateInMonth,
   diffDays,
   formatBulan,
   formatTanggal,
@@ -19,7 +20,9 @@ import {
   monthRange,
   monthStart,
   namaHari,
+  parseMonthParam,
   quarterOf,
+  toMonthParam,
   todayJakarta,
   weekdayIso,
   yearRange,
@@ -163,5 +166,26 @@ describe('Senin terdekat dan kuartal', () => {
   it('defaultCycleName', () => {
     expect(defaultCycleName(1, '2026-10-05')).toBe('Siklus 1: Q4 2026')
     expect(defaultCycleName(2, '2027-01-04')).toBe('Siklus 2: Q1 2027')
+  })
+})
+
+describe('parameter bulan di URL', () => {
+  it('parseMonthParam', () => {
+    expect(parseMonthParam('2026-10')).toBe('2026-10-01')
+    expect(parseMonthParam('2028-02')).toBe('2028-02-01')
+    expect(parseMonthParam('2026-13')).toBeNull()
+    expect(parseMonthParam('2026-1')).toBeNull()
+    expect(parseMonthParam('')).toBeNull()
+    expect(parseMonthParam(null)).toBeNull()
+  })
+
+  it('toMonthParam', () => {
+    expect(toMonthParam('2026-12-31')).toBe('2026-12')
+  })
+
+  it('defaultDateInMonth', () => {
+    expect(defaultDateInMonth('2026-10-01', '2026-10-17')).toBe('2026-10-17')
+    expect(defaultDateInMonth('2026-09-01', '2026-10-17')).toBe('2026-09-01')
+    expect(defaultDateInMonth('2027-01-01', '2026-12-31')).toBe('2027-01-01')
   })
 })
