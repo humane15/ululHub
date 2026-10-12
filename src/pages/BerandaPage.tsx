@@ -6,6 +6,7 @@ import { getMonthBudget, listCategories, listMonthTransactions, toCategoryLike }
 import { getActiveCycle, getCycleDetail, type CycleDetail } from '../db/learning'
 import type { LearningCycle } from '../db/types'
 import { useQuery, type QueryState } from '../db/useQuery'
+import { AlertList } from '../features/alerts/AlertList'
 import { MoneyTodayCard } from '../features/dashboard/MoneyTodayCard'
 import { TodayLearningCard } from '../features/dashboard/TodayLearningCard'
 import { TransactionForm, type TransactionDraft } from '../features/finance/TransactionForm'
@@ -36,6 +37,7 @@ export default function BerandaPage() {
   return (
     <>
       <PageHeader title="Beranda" subtitle={`${namaHari(weekdayIso(today))}, ${formatTanggal(today)}`} />
+      <AlertList limit={3} />
       <div className="grid gap-4 md:grid-cols-2 md:items-start">
         <div className="space-y-4">
           <LearningSection query={learning} today={today} />

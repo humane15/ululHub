@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router'
+import { useNavigate, useSearchParams } from 'react-router'
 import { BackLink } from '../components/BackLink'
 import { Button, Card, ErrorMessage, inputClass, PageHeader } from '../components/ui'
 import { createCycle, getActiveCycle, getCycleOverview, type CopyMode } from '../db/learning'
@@ -11,10 +11,10 @@ import {
   cycleRestEndDate,
   defaultCycleName,
   formatTanggal,
-  isMonday,
   isValidISODate,
-  mondayOnOrAfter,
+  namaHari,
   todayJakarta,
+  weekdayIso,
   type ISODate,
 } from '../lib/dates'
 
@@ -41,19 +41,23 @@ function NewCycleForm({
   active,
 }: Awaited<ReturnType<typeof getCycleOverview>> & { active: Awaited<ReturnType<typeof getActiveCycle>> }) {
   const navigate = useNavigate()
+  const [params] = useSearchParams()
+  // ?ulang=besok: ulangi siklus terakhir mulai besok (lewat tombol "Ulang siklus").
+  const repeatTomorrow = params.get('ulang') === 'besok'
   const today = todayJakarta()
-  // Default: Senin pertama setelah minggu istirahat siklus terakhir, tapi tidak sebelum hari ini.
+  const tomorrow = addDays(today, 1)
+  // Default: hari setelah minggu istirahat siklus terakhir, tapi tidak sebelum hari ini.
   const earliest = latest ? addDays(cycleRestEndDate(latest.start_date), 1) : today
   const [startDate, setStartDate] = useState<ISODate>(() =>
-    mondayOnOrAfter(compareISODate(earliest, today) > 0 ? earliest : today),
+    repeatTomorrow ? tomorrow : compareISODate(earliest, today) > 0 ? earliest : today,
   )
   const [name, setName] = useState('')
   const [vision, setVision] = useState('')
-  const [mode, setMode] = useState<CopyMode>(latest ? 'struktur' : 'kosong')
+  const [mode, setMode] = useState<CopyMode>(latest ? (repeatTomorrow ? 'lengkap' : 'struktur') : 'kosong')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const validStart = isValidISODate(startDate) && isMonday(startDate)
+  const validStart = isValidISODate(startDate)
   const autoName = validStart ? defaultCycleName(count + 1, startDate) : ''
   const finalName = name.trim() || autoName
 
@@ -78,12 +82,19 @@ function NewCycleForm({
       <form onSubmit={handleSubmit} className="space-y-4">
         <Card className="space-y-4">
           <label className="block space-y-1.5">
-            <span className="text-sm font-medium">Tanggal mulai (hari Senin)</span>
+            <span className="text-sm font-medium">Tanggal mulai</span>
             <input type="date" required value={startDate} onChange={(e) => setStartDate(e.target.value)} className={`${inputClass} num`} />
+            <button
+              type="button"
+              onClick={() => setStartDate(tomorrow)}
+              className="text-xs font-medium text-primary"
+            >
+              Mulai besok ({namaHari(weekdayIso(tomorrow))}, {formatTanggal(tomorrow, { short: true })})
+            </button>
             <span className={`block text-xs ${validStart ? 'text-muted' : 'text-bad'}`}>
               {validStart
-                ? `Minggu 1–12: ${formatTanggal(startDate, { short: true })} – ${formatTanggal(cycleEndDate(startDate), { short: true })}. Evaluasi sampai ${formatTanggal(cycleRestEndDate(startDate), { short: true })}.`
-                : 'Pilih tanggal yang jatuh pada hari Senin.'}
+                ? `${namaHari(weekdayIso(startDate))}. Minggu 1–12: ${formatTanggal(startDate, { short: true })} – ${formatTanggal(cycleEndDate(startDate), { short: true })}. Evaluasi sampai ${formatTanggal(cycleRestEndDate(startDate), { short: true })}.`
+                : 'Tanggal tidak valid.'}
             </span>
           </label>
           <label className="block space-y-1.5">
@@ -135,6 +146,11 @@ function NewCycleForm({
           </fieldset>
         </Card>
 
+        {repeatTomorrow && latest && (
+          <p className="rounded-xl bg-primary-soft/60 px-3 py-2 text-sm">
+            Mengulang <span className="font-medium">{latest.name}</span> mulai besok dengan salinan lengkap (topik, sumber, taktik; tanpa centang).
+          </p>
+        )}
         {active && (
           <p className="rounded-xl bg-warn/10 px-3 py-2 text-sm">
             Siklus aktif <span className="font-medium">{active.name}</span> akan ditandai selesai. Datanya tetap tersimpan.

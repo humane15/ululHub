@@ -66,6 +66,17 @@ export function todayJakarta(now: Date = new Date()): ISODate {
   return jakartaFormatter.format(now)
 }
 
+const jakartaHourFormatter = new Intl.DateTimeFormat('en-GB', {
+  timeZone: APP_TIME_ZONE,
+  hour: '2-digit',
+  hour12: false,
+})
+
+/** Jam saat ini (0..23) menurut Asia/Jakarta. */
+export function jakartaHour(now: Date = new Date()): number {
+  return Number(jakartaHourFormatter.format(now)) % 24
+}
+
 export function addDays(value: ISODate, days: number): ISODate {
   return fromUtcMs(toUtcMs(value) + days * DAY_MS)
 }

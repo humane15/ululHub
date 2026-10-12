@@ -2,6 +2,22 @@
 
 Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan versi memakai [SemVer](https://semver.org/lang/id/).
 
+## [0.8.0] - 2026-10-12
+
+### Ditambahkan
+- Pengingat interaktif (Beranda, ikon lonceng, halaman `/pengingat`): anggaran melebihi gaji, pos hampir habis atau
+  lewat batas, uang keluar melebihi pemasukan, target tabungan belum tercapai menjelang akhir bulan; belajar hari
+  ini belum dikerjakan, minggu tertinggal dari laju, hari tanpa progres, review minggu lalu belum diisi, siklus
+  mulai/berakhir. Setiap pengingat punya tombol aksi, "Besok lagi", dan "Abaikan".
+- Toast saat sebuah simpanan (transaksi atau centang taktik) memunculkan peringatan baru.
+- Notifikasi sistem opsional pada jam pengingat harian (Pengaturan), sekali per hari per peringatan.
+- "Ulang siklus": menyalin siklus terakhir secara lengkap dan mulai besok.
+- `src/lib/alerts.ts`, `src/lib/alertState.ts` + test.
+
+### Diubah
+- Siklus belajar boleh dimulai di hari apa saja, tidak harus Senin. **Jalankan migration
+  `20261012000001_siklus_boleh_mulai_hari_apa_saja.sql` di Supabase sebelum membuat siklus yang mulai Selasa.**
+
 ## [0.7.0] - 2026-10-05
 
 ### Ditambahkan

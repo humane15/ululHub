@@ -21,6 +21,7 @@ const LaporanPage = lazy(() => import('./pages/LaporanPage'))
 const LaporanTahunanPage = lazy(() => import('./pages/LaporanTahunanPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 const PengaturanPage = lazy(() => import('./pages/PengaturanPage'))
+const PengingatPage = lazy(() => import('./pages/PengingatPage'))
 const RiwayatSiklusPage = lazy(() => import('./pages/RiwayatSiklusPage'))
 const SiklusBaruPage = lazy(() => import('./pages/SiklusBaruPage'))
 
@@ -43,6 +44,7 @@ function AuthGate() {
         <Route path="belajar/riwayat/:id" element={<RiwayatSiklusPage />} />
         <Route path="laporan" element={<LaporanPage />} />
         <Route path="laporan/tahunan" element={<LaporanTahunanPage />} />
+        <Route path="pengingat" element={<PengingatPage />} />
         <Route path="pengaturan" element={<PengaturanPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>

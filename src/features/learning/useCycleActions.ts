@@ -10,6 +10,7 @@ import {
 import type { LearningCycle, LearningTactic } from '../../db/types'
 import type { QueryState } from '../../db/useQuery'
 import { nextSortOrder } from '../../lib/learning'
+import { announceDataChanged } from '../alerts/useAlerts'
 
 /** Data halaman Belajar: siklus aktif beserta isinya, atau tidak ada siklus aktif. */
 export type ActiveCycleData = { cycle: LearningCycle; detail: CycleDetail } | { cycle: null }
@@ -22,6 +23,7 @@ export function useCycleActions(cycleId: string, query: QueryState<ActiveCycleDa
     setError(null)
     try {
       await action()
+      announceDataChanged()
       query.reload()
     } catch (e) {
       setError((e as Error).message)
@@ -49,6 +51,7 @@ export function useCycleActions(cycleId: string, query: QueryState<ActiveCycleDa
       setDoneLocal(t.id, !t.done)
       try {
         await setTacticDone(t.id, !t.done)
+        announceDataChanged()
       } catch (e) {
         setDoneLocal(t.id, t.done)
         setError((e as Error).message)

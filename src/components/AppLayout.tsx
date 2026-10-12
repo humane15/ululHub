@@ -1,6 +1,8 @@
 import { Suspense, type ComponentType, type SVGProps } from 'react'
 import { NavLink, Outlet } from 'react-router'
-import { BookIcon, ChartIcon, HomeIcon, SettingsIcon, WalletIcon } from './icons'
+import { AlertsProvider } from '../features/alerts/AlertsProvider'
+import { useAlerts } from '../features/alerts/useAlerts'
+import { BellIcon, BookIcon, ChartIcon, HomeIcon, SettingsIcon, WalletIcon } from './icons'
 
 interface NavItem {
   to: string
@@ -35,7 +37,40 @@ function SidebarLink({ item }: { item: NavItem }) {
   )
 }
 
+function BellLink({ className = '' }: { className?: string }) {
+  const { alerts } = useAlerts()
+  const urgent = alerts.filter((a) => a.severity !== 'info').length
+  return (
+    <NavLink
+      to="/pengingat"
+      aria-label={alerts.length ? `Pengingat, ${alerts.length} aktif` : 'Pengingat'}
+      className={({ isActive }) =>
+        `relative rounded-lg p-2 ${isActive ? 'text-primary' : 'text-muted hover:text-text'} ${className}`
+      }
+    >
+      <BellIcon className="size-5" />
+      {alerts.length > 0 && (
+        <span
+          className={`num absolute top-0.5 right-0.5 flex min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-4 font-semibold text-white dark:text-slate-950 ${
+            urgent > 0 ? 'bg-bad' : 'bg-primary'
+          }`}
+        >
+          {alerts.length}
+        </span>
+      )}
+    </NavLink>
+  )
+}
+
 export function AppLayout() {
+  return (
+    <AlertsProvider>
+      <Layout />
+    </AlertsProvider>
+  )
+}
+
+function Layout() {
   return (
     <div className="min-h-dvh md:flex">
       {/* Sidebar (laptop) */}
@@ -48,7 +83,10 @@ export function AppLayout() {
             <SidebarLink key={item.to} item={item} />
           ))}
         </nav>
-        <SidebarLink item={SETTINGS_NAV} />
+        <div className="flex items-center justify-between">
+          <SidebarLink item={SETTINGS_NAV} />
+          <BellLink />
+        </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -57,15 +95,16 @@ export function AppLayout() {
           <span className="py-3 text-base font-semibold tracking-tight">
             Ulul <span className="text-primary">Hub</span>
           </span>
-          <NavLink
-            to={SETTINGS_NAV.to}
-            aria-label="Pengaturan"
-            className={({ isActive }) =>
-              `-mr-2 rounded-lg p-2 ${isActive ? 'text-primary' : 'text-muted hover:text-text'}`
-            }
-          >
-            <SettingsIcon className="size-5" />
-          </NavLink>
+          <div className="-mr-2 flex items-center">
+            <BellLink />
+            <NavLink
+              to={SETTINGS_NAV.to}
+              aria-label="Pengaturan"
+              className={({ isActive }) => `rounded-lg p-2 ${isActive ? 'text-primary' : 'text-muted hover:text-text'}`}
+            >
+              <SettingsIcon className="size-5" />
+            </NavLink>
+          </div>
         </header>
 
         <main className="mx-auto w-full max-w-5xl flex-1 px-4 pt-4 pb-28 md:px-8 md:pt-8 md:pb-10">

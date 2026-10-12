@@ -1,4 +1,5 @@
 import { Button, Card, PageHeader } from '../components/ui'
+import { ReminderSettings } from '../features/alerts/ReminderSettings'
 import { signOut, useSession } from '../features/auth/auth'
 import { BackupCard } from '../features/settings/BackupCard'
 import { SeedDataCard } from '../features/settings/SeedDataCard'
@@ -9,6 +10,7 @@ export default function PengaturanPage() {
     <>
       <PageHeader title="Pengaturan" />
       <div className="space-y-4">
+        <ReminderSettings />
         <SeedDataCard />
         <BackupCard />
         <Card className="space-y-3">

@@ -76,9 +76,14 @@ export default function BelajarPage() {
           title="Belum ada siklus aktif."
           description="Buat siklus baru untuk mulai merencanakan 12 minggu ke depan."
           action={
-            <Link to="/belajar/siklus-baru" className="inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white dark:text-slate-950">
-              Buat siklus baru
-            </Link>
+            <div className="flex flex-wrap justify-center gap-2">
+              <Link to="/belajar/siklus-baru?ulang=besok" className="inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white dark:text-slate-950">
+                Ulang siklus, mulai besok
+              </Link>
+              <Link to="/belajar/siklus-baru" className={linkClass}>
+                Buat siklus baru
+              </Link>
+            </div>
           }
         />
       </>
@@ -125,6 +130,9 @@ function ActiveCycle({
             </Link>
             <Link to="/belajar/catatan" className={linkClass}>
               Catatan
+            </Link>
+            <Link to="/belajar/siklus-baru?ulang=besok" className={linkClass}>
+              Ulang siklus
             </Link>
             <Link to="/belajar/atur" className={linkClass}>
               Atur siklus

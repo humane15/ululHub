@@ -26,3 +26,7 @@ export async function seedInitialData(params: {
   if (error) throw error
   return data
 }
+
+// export async function seedInitialDataIfNeeded(params: {
+//   month : ISODate
+// })

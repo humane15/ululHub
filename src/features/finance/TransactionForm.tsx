@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { announceDataChanged } from '../alerts/useAlerts'
 import { MoneyInput } from '../../components/MoneyInput'
 import { Button, inputClass } from '../../components/ui'
 import { createTransaction, deleteTransaction, updateTransaction, type TransactionInput } from '../../db/finance'
@@ -59,6 +60,7 @@ export function TransactionForm({
     setError(null)
     try {
       await action()
+      announceDataChanged()
       onDone()
     } catch (e) {
       setError((e as Error).message)
